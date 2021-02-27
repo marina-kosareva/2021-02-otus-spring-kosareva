@@ -3,14 +3,12 @@ package ru.otus;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ru.otus.service.QuestionnaireService;
 
-import java.io.IOException;
-
 public class App {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         ClassPathXmlApplicationContext context =
                 new ClassPathXmlApplicationContext("spring-context.xml");
 
         QuestionnaireService service = context.getBean(QuestionnaireService.class);
-        service.showQuestions();
+        service.questionsToDisplay().forEach(System.out::println);
     }
 }

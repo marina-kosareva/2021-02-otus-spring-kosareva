@@ -1,5 +1,6 @@
 package ru.otus.dao;
 
+import lombok.extern.slf4j.Slf4j;
 import org.supercsv.cellprocessor.Optional;
 import org.supercsv.cellprocessor.ParseInt;
 import org.supercsv.cellprocessor.constraint.StrMinMax;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 public class CsvParser implements Parser {
     private static final String[] MAPPING = new String[]{
             "id",
@@ -44,7 +46,7 @@ public class CsvParser implements Parser {
     };
 
     @Override
-    public List<Question> parse(String path) throws IOException {
+    public List<Question> parse(String path) {
         String fileName = Objects.requireNonNull(getClass().getClassLoader().getResource(path)).getFile();
         List<Question> questions = new ArrayList<>();
         try (ICsvDozerBeanReader pojoReader = new CsvDozerBeanReader(new FileReader(new File(fileName)),
@@ -55,6 +57,8 @@ public class CsvParser implements Parser {
             while ((question = pojoReader.read(Question.class, PROCESSORS)) != null) {
                 questions.add(question);
             }
+        } catch (IOException ex) {
+            log.error(ex.getMessage());
         }
         return questions;
     }

@@ -1,9 +1,9 @@
 package ru.otus.service;
 
-import java.io.IOException;
+import java.util.List;
 
 public interface QuestionnaireService {
 
-    void showQuestions() throws IOException;
+    List<String> questionsToDisplay();
 
 }

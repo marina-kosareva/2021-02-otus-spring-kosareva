@@ -18,9 +18,33 @@
         <opencsv.version>5.3</opencsv.version>
         <lombok.version>1.18.18</lombok.version>
         <super-csv-dozer.version>2.4.0</super-csv-dozer.version>
+        <slf4j.version>1.7.5</slf4j.version>
     </properties>
 
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.4.3</version>
+        <relativePath/>
+    </parent>
+
     <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
@@ -45,7 +69,6 @@
             <artifactId>super-csv-dozer</artifactId>
             <version>${super-csv-dozer.version}</version>
         </dependency>
-
     </dependencies>
 
 </project>
