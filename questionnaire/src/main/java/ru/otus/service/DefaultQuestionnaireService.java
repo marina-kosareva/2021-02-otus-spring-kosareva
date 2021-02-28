@@ -1,36 +1,30 @@
 package ru.otus.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import ru.otus.dao.Parser;
-import ru.otus.model.Answer;
-import ru.otus.model.Question;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import static ru.otus.utils.StreamsUtils.close;
+import static ru.otus.utils.StreamsUtils.writeToOutput;
 
-@Setter
-@RequiredArgsConstructor
 public class DefaultQuestionnaireService implements QuestionnaireService {
 
-    private final Parser parser;
-    private String fileName;
+    private final QuestionService questionService;
+    private Writer writer;
+
+    public DefaultQuestionnaireService(QuestionService questionService) {
+        this.questionService = questionService;
+        this.writer = new OutputStreamWriter(System.out);
+    }
 
     @Override
-    public List<String> questionsToDisplay() {
-        return parser.parse(fileName).stream()
-                .map(this::questionToDisplay)
-                .collect(Collectors.toList());
+    public void interview() {
+        showQuestions();
+
+        close(writer);
     }
 
-    private String questionToDisplay(Question question) {
-        return "Question: " + question.getTitle() + " Answer: " + answers(question.getAnswers());
-    }
-
-    private String answers(List<Answer> answers) {
-        return answers.stream()
-                .filter(answer -> answer.getTitle() != null)
-                .map(answer -> answer.getId() + ")" + answer.getTitle())
-                .collect(Collectors.joining(" "));
+    private void showQuestions() {
+        questionService.getQuestions()
+                .forEach(question -> writeToOutput(question.toString(), writer));
     }
 }

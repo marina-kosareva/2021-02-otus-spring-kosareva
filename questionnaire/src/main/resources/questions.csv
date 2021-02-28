@@ -1,6 +1,6 @@
-id,title,type,correctAnswer,answer1.id,answer1.title,answer2.id,answer2.title,answer3.id,answer3.title
-1,What is your name?,OPEN,,,,,,,
-2,Are you happy?,YES_NO,,1,yes,2,no,,
-3,2+2=...?,CLOSED,2,1,2,2,4,3,-2
-4,When will lockdown end in Latvia?,CLOSED,1,1,a month later,2,never,3,by the end of spring
-5,What is the most unprofessional thing you’ve seen someone do?,OPEN,,,,,,,
+id,title,correctAnswer,answer1.id,answer1.title,answer2.id,answer2.title,answer3.id,answer3.title
+1,What is the capital of Latvia?,2,1,Moscow,2,Riga,3,London
+2,Who wrote the novel war and peace?,1,1,Tolstoy,2,Pushkin,3,Nekrasov
+3,2+2=...?,2,1,2,2,4,3,-2
+4,When the second world war started?,3,1,1941,2,1945,3,1939
+5,What is the sum of all the angles in a trapezoid?,2,1,180,2,360,3,270

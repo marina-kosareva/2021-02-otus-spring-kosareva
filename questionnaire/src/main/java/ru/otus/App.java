@@ -9,6 +9,7 @@ public class App {
                 new ClassPathXmlApplicationContext("spring-context.xml");
 
         QuestionnaireService service = context.getBean(QuestionnaireService.class);
-        service.questionsToDisplay().forEach(System.out::println);
+
+        service.interview();
     }
 }
