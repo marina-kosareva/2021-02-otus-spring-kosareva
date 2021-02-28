@@ -1,0 +1,14 @@
+package ru.otus.model;
+
+import lombok.Data;
+
+@Data
+public class Answer {
+    private int id;
+    private String title;
+
+    @Override
+    public String toString() {
+        return String.format("%s) %s", id, title);
+    }
+}
