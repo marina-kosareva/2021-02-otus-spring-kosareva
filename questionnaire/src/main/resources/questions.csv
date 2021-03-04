@@ -4,3 +4,4 @@ id,title,correctAnswer,answer1.id,answer1.title,answer2.id,answer2.title,answer3
 3,2+2=...?,2,1,2,2,4,3,-2
 4,When the second world war started?,3,1,1941,2,1945,3,1939
 5,What is the sum of all the angles in a trapezoid?,2,1,180,2,360,3,270
+6,Question number 6 without correct answer,5,1,A,2,B,3,C

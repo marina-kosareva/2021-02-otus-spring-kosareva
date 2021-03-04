@@ -1,30 +1,65 @@
 package ru.otus.service;
 
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import ru.otus.model.Question;
 
-import static ru.otus.utils.StreamsUtils.close;
-import static ru.otus.utils.StreamsUtils.writeToOutput;
+import java.util.concurrent.atomic.AtomicInteger;
 
+@Service
 public class DefaultQuestionnaireService implements QuestionnaireService {
 
     private final QuestionService questionService;
-    private Writer writer;
+    private final InputOutputService streamService;
+    private final EvaluationService evaluationService;
+    private final int questionsNumber;
+    private final int threshold;
 
-    public DefaultQuestionnaireService(QuestionService questionService) {
+    DefaultQuestionnaireService(QuestionService questionService,
+                                InputOutputService streamService,
+                                EvaluationService evaluationService,
+                                @Value("${questions.size}") int questionsNumber,
+                                @Value("${threshold}") int threshold) {
         this.questionService = questionService;
-        this.writer = new OutputStreamWriter(System.out);
+        this.streamService = streamService;
+        this.evaluationService = evaluationService;
+        this.questionsNumber = questionsNumber;
+        this.threshold = threshold;
     }
 
     @Override
     public void interview() {
-        showQuestions();
+        AtomicInteger scoreResult = new AtomicInteger(0);
 
-        close(writer);
+        greet();
+
+        questionService.getQuestions()
+                .subList(0, questionsNumber)
+                .forEach(question -> {
+                    showQuestion(question);
+                    int score = evaluationService.evaluate(question, getAnswer());
+                    scoreResult.addAndGet(score);
+                });
+
+        showScore(scoreResult.get());
+
     }
 
-    private void showQuestions() {
-        questionService.getQuestions()
-                .forEach(question -> writeToOutput(question.toString(), writer));
+    private void greet() {
+        streamService.writeToOutput("Hello, what is your name?");
+        streamService.readFromInput();
+    }
+
+    private void showQuestion(Question question) {
+        streamService.writeToOutput(question.toString());
+    }
+
+    private String getAnswer() {
+        return streamService.readFromInput();
+    }
+
+    private void showScore(int score) {
+        String testResultMessage = score > threshold ? "passed" : "failed";
+        streamService.writeToOutput(String.format("Test %s. Your score is %s", testResultMessage, score));
     }
 }
