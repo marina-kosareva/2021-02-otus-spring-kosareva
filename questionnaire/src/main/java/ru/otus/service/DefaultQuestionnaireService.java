@@ -17,9 +17,8 @@ public class DefaultQuestionnaireService implements QuestionnaireService {
     private final InputOutputService inputOutputService;
     private final int questionsNumber;
     private final int threshold;
-
-    private OutputStream output;
-    private InputStream input;
+    private final OutputStream output;
+    private final InputStream input;
 
     DefaultQuestionnaireService(QuestionService questionService,
                                 EvaluationService evaluationService,
