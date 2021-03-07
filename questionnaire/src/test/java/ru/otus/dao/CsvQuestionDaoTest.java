@@ -14,14 +14,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@ExtendWith(MockitoExtension.class)
 class CsvQuestionDaoTest {
 
     @Test
     void getQuestions() {
-        CsvQuestionDao service = new CsvQuestionDao("testQuestions.csv");
+        CsvQuestionDao dao = new CsvQuestionDao("testQuestions.csv");
 
-        List<Question> questions = service.getQuestions();
+        List<Question> questions = dao.getQuestions();
 
         Question expected1 = Question.builder()
                 .id(1)
@@ -43,9 +42,9 @@ class CsvQuestionDaoTest {
     @Test
     void getQuestions_fileNotFound() {
 
-        CsvQuestionDao service = new CsvQuestionDao("unknown");
+        CsvQuestionDao dao = new CsvQuestionDao("unknown");
 
-        Exception exception = assertThrows(QuestionsLoadingException.class, service::getQuestions);
+        Exception exception = assertThrows(QuestionsLoadingException.class, dao::getQuestions);
 
         assertEquals("File with name unknown is not found", exception.getMessage());
     }
@@ -53,9 +52,9 @@ class CsvQuestionDaoTest {
     @Test
     void getQuestions_emptyFile() {
 
-        CsvQuestionDao service = new CsvQuestionDao("emptyQuestions.csv");
+        CsvQuestionDao dao = new CsvQuestionDao("emptyQuestions.csv");
 
-        List<Question> questions = service.getQuestions();
+        List<Question> questions = dao.getQuestions();
 
         assertThat(questions).isEmpty();
     }
@@ -63,9 +62,9 @@ class CsvQuestionDaoTest {
     @Test
     void getQuestions_incorrectFormatFile() {
 
-        CsvQuestionDao service = new CsvQuestionDao("incorrectFormatQuestions.csv");
+        CsvQuestionDao dao = new CsvQuestionDao("incorrectFormatQuestions.csv");
 
-        Exception exception = assertThrows(QuestionsLoadingException.class, service::getQuestions);
+        Exception exception = assertThrows(QuestionsLoadingException.class, dao::getQuestions);
 
         assertEquals("Csv parsing error", exception.getMessage());
     }

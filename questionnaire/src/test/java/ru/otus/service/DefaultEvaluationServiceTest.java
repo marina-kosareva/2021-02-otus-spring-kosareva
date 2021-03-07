@@ -15,7 +15,7 @@ class DefaultEvaluationServiceTest {
     private DefaultEvaluationService service;
 
     @Test
-    void evaluate_correctAnswer() {
+    void evaluate_inCorrectAnswer() {
         Question question = Question.builder()
                 .correctAnswer(1)
                 .build();
@@ -23,7 +23,7 @@ class DefaultEvaluationServiceTest {
     }
 
     @Test
-    void evaluate_incorrectAnswer() {
+    void evaluate_correctAnswer() {
 
         Question question = Question.builder()
                 .correctAnswer(1)

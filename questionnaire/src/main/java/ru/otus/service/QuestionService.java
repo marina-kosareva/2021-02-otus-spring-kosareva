@@ -9,4 +9,6 @@ public interface QuestionService {
 
     List<Question> getQuestions() throws QuestionsLoadingException;
 
+    List<Question> getQuestions(int limit) throws QuestionsLoadingException;
+
 }

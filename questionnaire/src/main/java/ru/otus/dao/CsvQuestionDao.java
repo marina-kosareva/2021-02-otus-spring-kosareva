@@ -2,7 +2,7 @@ package ru.otus.dao;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 import org.supercsv.cellprocessor.Optional;
 import org.supercsv.cellprocessor.ParseInt;
 import org.supercsv.cellprocessor.constraint.StrMinMax;
@@ -22,7 +22,7 @@ import java.util.List;
 import static java.lang.String.format;
 
 @Slf4j
-@Service
+@Repository
 public class CsvQuestionDao implements QuestionDao {
 
     private final String fileName;

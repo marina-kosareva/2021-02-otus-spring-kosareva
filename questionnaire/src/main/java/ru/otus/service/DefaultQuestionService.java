@@ -7,6 +7,7 @@ import ru.otus.exceptions.QuestionsLoadingException;
 import ru.otus.model.Question;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,4 +20,10 @@ public class DefaultQuestionService implements QuestionService {
         return dao.getQuestions();
     }
 
+    @Override
+    public List<Question> getQuestions(int limit) throws QuestionsLoadingException {
+        return dao.getQuestions().stream()
+                .limit(limit)
+                .collect(Collectors.toList());
+    }
 }

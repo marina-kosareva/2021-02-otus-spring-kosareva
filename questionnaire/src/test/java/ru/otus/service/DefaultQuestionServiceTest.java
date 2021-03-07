@@ -24,13 +24,28 @@ class DefaultQuestionServiceTest {
     private DefaultQuestionService service;
 
     @Test
-    void interview() {
+    void getQuestions() {
         Question question1 = mock(Question.class);
         Question question2 = mock(Question.class);
 
         when(questionDao.getQuestions()).thenReturn(asList(question1, question2));
 
         List<Question> result = service.getQuestions();
+
+        assertThat(result).containsExactlyInAnyOrder(question1, question2);
+
+        verify(questionDao).getQuestions();
+    }
+
+    @Test
+    void getQuestionsWithLimit() {
+        Question question1 = mock(Question.class);
+        Question question2 = mock(Question.class);
+        Question question3 = mock(Question.class);
+
+        when(questionDao.getQuestions()).thenReturn(asList(question1, question2, question3));
+
+        List<Question> result = service.getQuestions(2);
 
         assertThat(result).containsExactlyInAnyOrder(question1, question2);
 
