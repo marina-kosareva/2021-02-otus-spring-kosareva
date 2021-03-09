@@ -4,8 +4,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.otus.model.Question;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -17,8 +15,6 @@ public class DefaultQuestionnaireService implements QuestionnaireService {
     private final InputOutputService inputOutputService;
     private final int questionsNumber;
     private final int threshold;
-    private final OutputStream output;
-    private final InputStream input;
 
     DefaultQuestionnaireService(QuestionService questionService,
                                 EvaluationService evaluationService,
@@ -32,8 +28,6 @@ public class DefaultQuestionnaireService implements QuestionnaireService {
         this.inputOutputService = inputOutputService;
         this.questionsNumber = questionsNumber;
         this.threshold = threshold;
-        this.output = System.out;
-        this.input = System.in;
     }
 
     @Override
@@ -53,22 +47,22 @@ public class DefaultQuestionnaireService implements QuestionnaireService {
     }
 
     private String getUserName() {
-        inputOutputService.writeToOutput(output, "Hello, what is your name?");
-        return inputOutputService.readFromInput(input);
+        inputOutputService.writeToOutput("Hello, what is your name?");
+        return inputOutputService.readFromInput();
     }
 
     private int askAndEvaluateAnswer(Question question) {
         showQuestion(question);
-        String userAnswer = inputOutputService.readFromInput(input);
+        String userAnswer = inputOutputService.readFromInput();
         return evaluationService.evaluate(question, userAnswer);
     }
 
     private void showQuestion(Question question) {
-        inputOutputService.writeToOutput(output, mapperService.mapQuestionToString(question));
+        inputOutputService.writeToOutput(mapperService.mapQuestionToString(question));
     }
 
     private void showScore(String userName, int score) {
         String testResultMessage = score > threshold ? "passed" : "failed";
-        inputOutputService.writeToOutput(output, String.format("Test %s. %s, your score is %s", testResultMessage, userName, score));
+        inputOutputService.writeToOutput(String.format("Test %s. %s, your score is %s", testResultMessage, userName, score));
     }
 }

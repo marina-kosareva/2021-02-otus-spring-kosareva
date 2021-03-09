@@ -21,15 +21,15 @@ class DefaultQuestionnaireServiceIT {
 
     @Test
     void interview() {
-        when(inputOutputService.readFromInput(System.in)).thenReturn("Marina Kosareva", "1", "2", "1");
+        when(inputOutputService.readFromInput()).thenReturn("Marina Kosareva", "1", "2", "1");
 
         service.interview();
 
-        verify(inputOutputService).writeToOutput(System.out, "Hello, what is your name?");
-        verify(inputOutputService).writeToOutput(System.out, "Question1 Answers: 1) answer1 2) answer2 3) answer3");
-        verify(inputOutputService).writeToOutput(System.out, "Question2 Answers: 1) answer1 2) answer2 3) answer3");
-        verify(inputOutputService).writeToOutput(System.out, "Question3 Answers: 1) answer1 2) answer2 3) answer3");
-        verify(inputOutputService).writeToOutput(System.out, "Test failed. Marina Kosareva, your score is 2");
+        verify(inputOutputService).writeToOutput("Hello, what is your name?");
+        verify(inputOutputService).writeToOutput("Question1 Answers: 1) answer1 2) answer2 3) answer3");
+        verify(inputOutputService).writeToOutput("Question2 Answers: 1) answer1 2) answer2 3) answer3");
+        verify(inputOutputService).writeToOutput("Question3 Answers: 1) answer1 2) answer2 3) answer3");
+        verify(inputOutputService).writeToOutput("Test failed. Marina Kosareva, your score is 2");
 
     }
 }

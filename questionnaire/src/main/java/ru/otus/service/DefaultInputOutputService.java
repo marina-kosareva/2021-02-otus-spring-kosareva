@@ -11,8 +11,15 @@ import java.io.*;
 @Service
 public class DefaultInputOutputService implements InputOutputService {
 
-    public void writeToOutput(OutputStream outputStream, String str) throws WriteException {
-        Writer writer = new OutputStreamWriter(outputStream);
+    private final Writer writer;
+    private final BufferedReader reader;
+
+    public DefaultInputOutputService(InputStream in, OutputStream out) {
+        this.writer = new OutputStreamWriter(out);
+        this.reader = new BufferedReader(new InputStreamReader(in));
+    }
+
+    public void writeToOutput(String str) throws WriteException {
         try {
             writer.write(str);
             writer.flush();
@@ -21,8 +28,7 @@ public class DefaultInputOutputService implements InputOutputService {
         }
     }
 
-    public String readFromInput(InputStream inputStream) throws ReadException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+    public String readFromInput() throws ReadException {
         try {
             return reader.readLine();
         } catch (IOException e) {
