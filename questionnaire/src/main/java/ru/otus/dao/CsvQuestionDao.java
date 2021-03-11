@@ -1,7 +1,8 @@
 package ru.otus.dao;
 
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Repository;
 import org.supercsv.cellprocessor.Optional;
 import org.supercsv.cellprocessor.ParseInt;
 import org.supercsv.cellprocessor.constraint.StrMinMax;
@@ -9,7 +10,7 @@ import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.io.dozer.CsvDozerBeanReader;
 import org.supercsv.io.dozer.ICsvDozerBeanReader;
 import org.supercsv.prefs.CsvPreference;
-import ru.otus.exceptions.CsvParseException;
+import ru.otus.exceptions.QuestionsLoadingException;
 import ru.otus.model.Question;
 
 import java.io.File;
@@ -21,10 +22,15 @@ import java.util.List;
 import static java.lang.String.format;
 
 @Slf4j
+@Repository
 public class CsvQuestionDao implements QuestionDao {
 
-    @Setter
-    private String fileName;
+    private final String fileName;
+
+    CsvQuestionDao(@Value("${questions.csv.file.name}") String fileName) {
+        this.fileName = fileName;
+    }
+
     private static final String[] MAPPING = new String[]{
             "id",
             "title",
@@ -50,7 +56,7 @@ public class CsvQuestionDao implements QuestionDao {
     };
 
     @Override
-    public List<Question> getQuestions() throws CsvParseException {
+    public List<Question> getQuestions() throws QuestionsLoadingException {
         File file = getFileFromResource(fileName);
         List<Question> questions = new ArrayList<>();
         try (ICsvDozerBeanReader pojoReader = new CsvDozerBeanReader(new FileReader(file),
@@ -62,16 +68,16 @@ public class CsvQuestionDao implements QuestionDao {
                 questions.add(question);
             }
         } catch (Exception ex) {
-            throw new CsvParseException(ex.getMessage());
+            throw new QuestionsLoadingException("Csv parsing error", ex);
         }
         return questions;
     }
 
-    private File getFileFromResource(String fileName) throws CsvParseException {
+    private File getFileFromResource(String fileName) throws QuestionsLoadingException {
         ClassLoader classLoader = getClass().getClassLoader();
         URL resource = classLoader.getResource(fileName);
         if (resource == null) {
-            throw new CsvParseException(format("File with name %s is not found", fileName));
+            throw new QuestionsLoadingException(format("File with name %s is not found", fileName));
         }
         return new File(resource.getFile());
     }

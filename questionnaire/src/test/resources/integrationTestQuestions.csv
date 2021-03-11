@@ -1,0 +1,8 @@
+id,title,correctAnswer,answer1.id,answer1.title,answer2.id,answer2.title,answer3.id,answer3.title
+1,Question1,1,1,answer1,2,answer2,3,answer3
+2,Question2,1,1,answer1,2,answer2,3,answer3
+3,Question3,1,1,answer1,2,answer2,3,answer3
+4,Question4,1,1,answer1,2,answer2,3,answer3
+5,Question5,1,1,answer1,2,answer2,3,answer3
+6,Question6,1,1,answer1,2,answer2,3,answer3
+
