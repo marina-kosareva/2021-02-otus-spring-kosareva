@@ -27,7 +27,8 @@ public class CsvQuestionDao implements QuestionDao {
 
     private final String fileName;
 
-    CsvQuestionDao(@Value("${questions.csv.file.name}") String fileName) {
+    CsvQuestionDao(@Value("${questions.csv.file.name.${locale.value:en_US}:${questions.csv.file.name.en_US}}")
+                           String fileName) {
         this.fileName = fileName;
     }
 

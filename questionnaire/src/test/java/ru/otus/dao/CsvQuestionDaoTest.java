@@ -1,8 +1,6 @@
 package ru.otus.dao;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import ru.otus.exceptions.QuestionsLoadingException;
 import ru.otus.model.Answer;
 import ru.otus.model.Question;

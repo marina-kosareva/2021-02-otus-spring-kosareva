@@ -1,0 +1,16 @@
+questions:
+  csv:
+    file:
+      name:
+        en_US: integrationTestQuestions.csv
+  size: 3
+
+threshold: 2
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  messages:
+    basename: i18n/messages
+    encoding: utf-8
+    fallback-to-system-locale: false

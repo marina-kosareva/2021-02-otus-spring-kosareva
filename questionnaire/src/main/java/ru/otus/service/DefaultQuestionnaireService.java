@@ -13,6 +13,7 @@ public class DefaultQuestionnaireService implements QuestionnaireService {
     private final EvaluationService evaluationService;
     private final MapperService mapperService;
     private final InputOutputService inputOutputService;
+    private final LocalizationService localizationService;
     private final int questionsNumber;
     private final int threshold;
 
@@ -20,12 +21,14 @@ public class DefaultQuestionnaireService implements QuestionnaireService {
                                 EvaluationService evaluationService,
                                 MapperService mapperService,
                                 InputOutputService inputOutputService,
+                                LocalizationService localizationService,
                                 @Value("${questions.size}") int questionsNumber,
                                 @Value("${threshold}") int threshold) {
         this.questionService = questionService;
         this.evaluationService = evaluationService;
         this.mapperService = mapperService;
         this.inputOutputService = inputOutputService;
+        this.localizationService = localizationService;
         this.questionsNumber = questionsNumber;
         this.threshold = threshold;
     }
@@ -47,7 +50,7 @@ public class DefaultQuestionnaireService implements QuestionnaireService {
     }
 
     private String getUserName() {
-        inputOutputService.writeToOutput("Hello, what is your name?");
+        inputOutputService.writeToOutput(localizationService.getMessage("interview.nameQuestion"));
         return inputOutputService.readFromInput();
     }
 
@@ -62,7 +65,9 @@ public class DefaultQuestionnaireService implements QuestionnaireService {
     }
 
     private void showScore(String userName, int score) {
-        String testResultMessage = score > threshold ? "passed" : "failed";
-        inputOutputService.writeToOutput(String.format("Test %s. %s, your score is %s", testResultMessage, userName, score));
+        String testResultMessage = score > threshold
+                ? localizationService.getMessage("interview.passed")
+                : localizationService.getMessage("interview.failed");
+        inputOutputService.writeToOutput(localizationService.getMessage("interview.score", testResultMessage, userName, score));
     }
 }
