@@ -1,0 +1,18 @@
+questions:
+  csv-file-names:
+    en_US: emptyQuestions.csv
+    en_CA: integrationTestQuestions.csv
+  size: 3
+  threshold: 2
+
+locale:
+  language: en
+  country: CA
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  messages:
+    basename: i18n/messages
+    encoding: utf-8
+    fallback-to-system-locale: false

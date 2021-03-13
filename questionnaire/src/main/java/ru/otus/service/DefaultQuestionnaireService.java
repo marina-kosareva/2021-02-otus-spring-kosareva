@@ -1,34 +1,22 @@
 package ru.otus.service;
 
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.otus.configuration.QuestionProperties;
 import ru.otus.model.Question;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
+@RequiredArgsConstructor
 public class DefaultQuestionnaireService implements QuestionnaireService {
 
     private final QuestionService questionService;
     private final EvaluationService evaluationService;
     private final MapperService mapperService;
     private final InputOutputService inputOutputService;
-    private final int questionsNumber;
-    private final int threshold;
-
-    DefaultQuestionnaireService(QuestionService questionService,
-                                EvaluationService evaluationService,
-                                MapperService mapperService,
-                                InputOutputService inputOutputService,
-                                @Value("${questions.size}") int questionsNumber,
-                                @Value("${threshold}") int threshold) {
-        this.questionService = questionService;
-        this.evaluationService = evaluationService;
-        this.mapperService = mapperService;
-        this.inputOutputService = inputOutputService;
-        this.questionsNumber = questionsNumber;
-        this.threshold = threshold;
-    }
+    private final QuestionProperties questionProperties;
+    private final PrintService printService;
 
     @Override
     public void interview() {
@@ -36,7 +24,7 @@ public class DefaultQuestionnaireService implements QuestionnaireService {
 
         String userName = getUserName();
 
-        questionService.getQuestions(questionsNumber)
+        questionService.getQuestions(questionProperties.getSize())
                 .forEach(question -> {
                     int scoreByQuestion = askAndEvaluateAnswer(question);
                     scoreResult.addAndGet(scoreByQuestion);
@@ -47,7 +35,7 @@ public class DefaultQuestionnaireService implements QuestionnaireService {
     }
 
     private String getUserName() {
-        inputOutputService.writeToOutput("Hello, what is your name?");
+        printService.printLocalizedMessage("interview.nameQuestion");
         return inputOutputService.readFromInput();
     }
 
@@ -58,11 +46,13 @@ public class DefaultQuestionnaireService implements QuestionnaireService {
     }
 
     private void showQuestion(Question question) {
-        inputOutputService.writeToOutput(mapperService.mapQuestionToString(question));
+        printService.printMessage(mapperService.mapQuestionToString(question));
     }
 
     private void showScore(String userName, int score) {
-        String testResultMessage = score > threshold ? "passed" : "failed";
-        inputOutputService.writeToOutput(String.format("Test %s. %s, your score is %s", testResultMessage, userName, score));
+        String testResultMessageCode = score > questionProperties.getThreshold()
+                ? "interview.score.passed"
+                : "interview.score.failed";
+        printService.printLocalizedMessage(testResultMessageCode, userName, score);
     }
 }

@@ -1,7 +1,7 @@
 package ru.otus.dao;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 import org.supercsv.cellprocessor.Optional;
 import org.supercsv.cellprocessor.ParseInt;
@@ -10,6 +10,7 @@ import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.io.dozer.CsvDozerBeanReader;
 import org.supercsv.io.dozer.ICsvDozerBeanReader;
 import org.supercsv.prefs.CsvPreference;
+import ru.otus.configuration.QuestionProperties;
 import ru.otus.exceptions.QuestionsLoadingException;
 import ru.otus.model.Question;
 
@@ -23,13 +24,10 @@ import static java.lang.String.format;
 
 @Slf4j
 @Repository
+@RequiredArgsConstructor
 public class CsvQuestionDao implements QuestionDao {
 
-    private final String fileName;
-
-    CsvQuestionDao(@Value("${questions.csv.file.name}") String fileName) {
-        this.fileName = fileName;
-    }
+    private final QuestionProperties properties;
 
     private static final String[] MAPPING = new String[]{
             "id",
@@ -57,7 +55,7 @@ public class CsvQuestionDao implements QuestionDao {
 
     @Override
     public List<Question> getQuestions() throws QuestionsLoadingException {
-        File file = getFileFromResource(fileName);
+        File file = getFileFromResource(properties.getFileName());
         List<Question> questions = new ArrayList<>();
         try (ICsvDozerBeanReader pojoReader = new CsvDozerBeanReader(new FileReader(file),
                 CsvPreference.STANDARD_PREFERENCE)) {

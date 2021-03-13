@@ -1,0 +1,18 @@
+questions:
+  csv-file-names:
+    en_US: questions.csv
+    ru_RU: questions_ru_RU.csv
+  size: 5
+  threshold: 3
+
+locale:
+  language: ru
+  country: RU
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  messages:
+    basename: i18n/messages
+    encoding: utf-8
+    fallback-to-system-locale: false
