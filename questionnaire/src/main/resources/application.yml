@@ -1,17 +1,13 @@
 questions:
-  csv:
-    file:
-      name:
-        en_US: questions.csv
-        ru_RU: questions_ru_RU.csv
+  csv-file-names:
+    en_US: questions.csv
+    ru_RU: questions_ru_RU.csv
   size: 5
-
-threshold: 3
+  threshold: 3
 
 locale:
   language: ru
   country: RU
-  value: ${locale.language}_${locale.country}
 
 spring:
   main:

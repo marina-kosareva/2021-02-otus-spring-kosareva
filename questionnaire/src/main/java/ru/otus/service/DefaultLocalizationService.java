@@ -1,33 +1,24 @@
 package ru.otus.service;
 
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
-
-import java.util.Locale;
+import ru.otus.configuration.LocaleProperties;
 
 @Service
+@RequiredArgsConstructor
 public class DefaultLocalizationService implements LocalizationService {
 
     private final MessageSource messageSource;
-    private final String language;
-    private final String country;
-
-    public DefaultLocalizationService(MessageSource messageSource,
-                                      @Value("${locale.language:en}") String language,
-                                      @Value("${locale.country:US}") String country) {
-        this.messageSource = messageSource;
-        this.language = language;
-        this.country = country;
-    }
+    private final LocaleProperties properties;
 
     @Override
     public String getMessage(String code) {
-        return messageSource.getMessage(code, null, new Locale(language, country));
+        return messageSource.getMessage(code, null, properties.getLocale());
     }
 
     @Override
     public String getMessage(String code, Object... args) {
-        return messageSource.getMessage(code, args.clone(), new Locale(language, country));
+        return messageSource.getMessage(code, args.clone(), properties.getLocale());
     }
 }

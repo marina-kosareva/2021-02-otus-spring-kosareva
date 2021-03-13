@@ -1,6 +1,11 @@
 package ru.otus.dao;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import ru.otus.configuration.QuestionProperties;
 import ru.otus.exceptions.QuestionsLoadingException;
 import ru.otus.model.Answer;
 import ru.otus.model.Question;
@@ -11,12 +16,20 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class CsvQuestionDaoTest {
+
+    @Mock
+    private QuestionProperties properties;
+
+    @InjectMocks
+    private CsvQuestionDao dao;
 
     @Test
     void getQuestions() {
-        CsvQuestionDao dao = new CsvQuestionDao("testQuestions.csv");
+        when(properties.getFileName()).thenReturn("testQuestions.csv");
 
         List<Question> questions = dao.getQuestions();
 
@@ -39,8 +52,7 @@ class CsvQuestionDaoTest {
 
     @Test
     void getQuestions_fileNotFound() {
-
-        CsvQuestionDao dao = new CsvQuestionDao("unknown");
+        when(properties.getFileName()).thenReturn("unknown");
 
         Exception exception = assertThrows(QuestionsLoadingException.class, dao::getQuestions);
 
@@ -49,8 +61,7 @@ class CsvQuestionDaoTest {
 
     @Test
     void getQuestions_emptyFile() {
-
-        CsvQuestionDao dao = new CsvQuestionDao("emptyQuestions.csv");
+        when(properties.getFileName()).thenReturn("emptyQuestions.csv");
 
         List<Question> questions = dao.getQuestions();
 
@@ -59,8 +70,7 @@ class CsvQuestionDaoTest {
 
     @Test
     void getQuestions_incorrectFormatFile() {
-
-        CsvQuestionDao dao = new CsvQuestionDao("incorrectFormatQuestions.csv");
+        when(properties.getFileName()).thenReturn("incorrectFormatQuestions.csv");
 
         Exception exception = assertThrows(QuestionsLoadingException.class, dao::getQuestions);
 
