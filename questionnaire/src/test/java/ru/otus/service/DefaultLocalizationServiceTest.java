@@ -1,9 +1,9 @@
 package ru.otus.service;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 
 import java.util.Locale;
@@ -12,18 +12,17 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
 class DefaultLocalizationServiceTest {
 
-    private static final String LOCALE_LANGUAGE_EN = "en";
-    private static final String LOCALE_COUNTRY_CA = "CA";
-
-    @Mock
+    @MockBean
     private MessageSource messageSource;
+
+    @Autowired
+    DefaultLocalizationService service;
 
     @Test
     void getMessage() {
-        LocalizationService service = new DefaultLocalizationService(messageSource, LOCALE_LANGUAGE_EN, LOCALE_COUNTRY_CA);
 
         when(messageSource.getMessage("message", null, Locale.CANADA))
                 .thenReturn("localizedMessage");
@@ -36,7 +35,6 @@ class DefaultLocalizationServiceTest {
 
     @Test
     void getMessageWithParams() {
-        LocalizationService service = new DefaultLocalizationService(messageSource, LOCALE_LANGUAGE_EN, LOCALE_COUNTRY_CA);
 
         String[] params = new String[]{"abc", "def"};
 

@@ -2,10 +2,16 @@ questions:
   csv:
     file:
       name:
-        en_US: integrationTestQuestions.csv
+        en_US: emptyQuestions.csv
+        en_CA: integrationTestQuestions.csv
   size: 3
 
 threshold: 2
+
+locale:
+  language: en
+  country: CA
+  value: ${locale.language}_${locale.country}
 
 spring:
   main:

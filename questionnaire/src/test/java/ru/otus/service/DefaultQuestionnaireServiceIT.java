@@ -22,11 +22,11 @@ class DefaultQuestionnaireServiceIT {
 
         service.interview();
 
-        verify(inputOutputService).writeToOutput("Hello, what is your name?");
-        verify(inputOutputService).writeToOutput("Question1 Answers: 1) answer1 2) answer2 3) answer3");
-        verify(inputOutputService).writeToOutput("Question2 Answers: 1) answer1 2) answer2 3) answer3");
-        verify(inputOutputService).writeToOutput("Question3 Answers: 1) answer1 2) answer2 3) answer3");
-        verify(inputOutputService).writeToOutput("Test failed. Marina Kosareva, your score is 2");
+        verify(inputOutputService).writeToOutput("[CA] Hello, what is your name?");
+        verify(inputOutputService).writeToOutput("Question1 [CA] Answers: 1) answer1 2) answer2 3) answer3");
+        verify(inputOutputService).writeToOutput("Question2 [CA] Answers: 1) answer1 2) answer2 3) answer3");
+        verify(inputOutputService).writeToOutput("Question3 [CA] Answers: 1) answer1 2) answer2 3) answer3");
+        verify(inputOutputService).writeToOutput("[CA] Test failed. Marina Kosareva, your score is 2");
 
     }
 }
