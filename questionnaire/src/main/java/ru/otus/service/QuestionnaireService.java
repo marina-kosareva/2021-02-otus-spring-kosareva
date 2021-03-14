@@ -2,6 +2,8 @@ package ru.otus.service;
 
 public interface QuestionnaireService {
 
-    void interview();
+    String getUserName();
+
+    void interview(String userName);
 
 }
