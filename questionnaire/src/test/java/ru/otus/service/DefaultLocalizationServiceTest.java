@@ -24,12 +24,12 @@ class DefaultLocalizationServiceTest {
     @Test
     void getMessage() {
 
-        when(messageSource.getMessage("message", null, Locale.CANADA))
+        when(messageSource.getMessage("message", new Object[0], Locale.CANADA))
                 .thenReturn("localizedMessage");
 
         assertThat(service.getMessage("message")).isEqualTo("localizedMessage");
 
-        verify(messageSource).getMessage("message", null, Locale.CANADA);
+        verify(messageSource).getMessage("message", new Object[0], Locale.CANADA);
 
     }
 

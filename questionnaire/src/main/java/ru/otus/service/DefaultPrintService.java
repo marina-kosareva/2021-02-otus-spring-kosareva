@@ -3,8 +3,6 @@ package ru.otus.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.stream.Stream;
-
 @Service
 @RequiredArgsConstructor
 public class DefaultPrintService implements PrintService {
@@ -14,9 +12,7 @@ public class DefaultPrintService implements PrintService {
 
     @Override
     public void printLocalizedMessage(String messageCode, Object... args) {
-        String localizedMessage = Stream.of(args).count() != 0L
-                ? localizationService.getMessage(messageCode, args)
-                : localizationService.getMessage(messageCode);
+        String localizedMessage = localizationService.getMessage(messageCode, args);
         printMessage(localizedMessage);
     }
 
