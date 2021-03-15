@@ -9,10 +9,13 @@ import ru.otus.configuration.QuestionProperties;
 import ru.otus.model.Question;
 
 import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DefaultQuestionnaireServiceTest {
+
+    private static final String USER_NAME = "userName";
 
     @Mock
     private QuestionService questionService;
@@ -31,6 +34,16 @@ class DefaultQuestionnaireServiceTest {
     DefaultQuestionnaireService service;
 
     @Test
+    void getUserName() {
+
+        when(inputOutputService.readFromInput()).thenReturn(USER_NAME);
+
+        assertThat(service.getUserName()).isEqualTo(USER_NAME);
+
+        verify(printService).printLocalizedMessage("interview.nameQuestion");
+    }
+
+    @Test
     void interview() {
 
         Question question1 = mock(Question.class);
@@ -40,15 +53,15 @@ class DefaultQuestionnaireServiceTest {
         when(questionProperties.getThreshold()).thenReturn(1);
 
         when(questionService.getQuestions(2)).thenReturn(asList(question1, question2));
-        when(inputOutputService.readFromInput()).thenReturn("Marina Kosareva", "2", "1");
+        when(inputOutputService.readFromInput()).thenReturn("2", "1");
         when(mapperService.mapQuestionToString(question1)).thenReturn("shown question1 with answers");
         when(evaluationService.evaluate(question1, "2")).thenReturn(0);
         when(mapperService.mapQuestionToString(question2)).thenReturn("shown question2 with answers");
         when(evaluationService.evaluate(question2, "1")).thenReturn(1);
 
-        service.interview();
+        service.interview(USER_NAME);
 
-        verify(inputOutputService, times(3)).readFromInput();
+        verify(inputOutputService, times(2)).readFromInput();
 
         verify(questionService).getQuestions(2);
 
@@ -60,8 +73,7 @@ class DefaultQuestionnaireServiceTest {
         verify(printService).printMessage("shown question2 with answers");
         verify(evaluationService).evaluate(question2, "1");
 
-        verify(printService).printLocalizedMessage("interview.nameQuestion");
-        verify(printService).printLocalizedMessage("interview.score.failed", "Marina Kosareva", 1);
+        verify(printService).printLocalizedMessage("interview.score.failed", USER_NAME, 1);
 
         verifyNoMoreInteractions(inputOutputService, questionService, evaluationService);
     }

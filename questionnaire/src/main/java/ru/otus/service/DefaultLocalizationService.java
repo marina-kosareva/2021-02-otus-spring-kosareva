@@ -13,11 +13,6 @@ public class DefaultLocalizationService implements LocalizationService {
     private final LocaleProperties properties;
 
     @Override
-    public String getMessage(String code) {
-        return messageSource.getMessage(code, null, properties.getLocale());
-    }
-
-    @Override
     public String getMessage(String code, Object... args) {
         return messageSource.getMessage(code, args.clone(), properties.getLocale());
     }

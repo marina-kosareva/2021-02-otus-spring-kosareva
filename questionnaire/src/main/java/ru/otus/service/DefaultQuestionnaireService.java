@@ -19,10 +19,14 @@ public class DefaultQuestionnaireService implements QuestionnaireService {
     private final PrintService printService;
 
     @Override
-    public void interview() {
-        AtomicInteger scoreResult = new AtomicInteger(0);
+    public String getUserName() {
+        printService.printLocalizedMessage("interview.nameQuestion");
+        return inputOutputService.readFromInput();
+    }
 
-        String userName = getUserName();
+    @Override
+    public void interview(String userName) {
+        AtomicInteger scoreResult = new AtomicInteger(0);
 
         questionService.getQuestions(questionProperties.getSize())
                 .forEach(question -> {
@@ -31,12 +35,6 @@ public class DefaultQuestionnaireService implements QuestionnaireService {
                 });
 
         showScore(userName, scoreResult.get());
-
-    }
-
-    private String getUserName() {
-        printService.printLocalizedMessage("interview.nameQuestion");
-        return inputOutputService.readFromInput();
     }
 
     private int askAndEvaluateAnswer(Question question) {
