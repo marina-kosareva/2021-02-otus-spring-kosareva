@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import ru.otus.books.exceptions.AuthorDaoException;
+import ru.otus.books.exceptions.BookDaoException;
 import ru.otus.books.model.Author;
 
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.*;
 
 @JdbcTest
-@Import(AuthorDaoJdbc.class)
+@Import({BookDaoJdbc.class, AuthorDaoJdbc.class})
 class AuthorDaoTest {
 
     private static final Author EXISTING_AUTHOR_1 = Author.builder()
@@ -28,6 +29,10 @@ class AuthorDaoTest {
             .lastName("last_name_2")
             .build();
     private static final Long NON_EXISTING_AUTHOR_ID = 100L;
+    private static final Long EXISTING_BOOK_ID_FOR_AUTHOR_1 = 1L;
+
+    @Autowired
+    private BookDaoJdbc bookDaoJdbc;
 
     @Autowired
     private AuthorDaoJdbc daoJdbc;
@@ -101,6 +106,18 @@ class AuthorDaoTest {
         assertThatThrownBy(() -> daoJdbc.getById(EXISTING_AUTHOR_1.getId()))
                 .isInstanceOf(AuthorDaoException.class)
                 .hasMessage("error getting author by id " + EXISTING_AUTHOR_1.getId())
+                .hasCauseInstanceOf(EmptyResultDataAccessException.class);
+    }
+
+    @Test
+    void shouldDeleteBookIfAuthorDeleted() {
+        assertThatCode(() -> bookDaoJdbc.getById(EXISTING_BOOK_ID_FOR_AUTHOR_1)).doesNotThrowAnyException();
+
+        daoJdbc.deleteById(EXISTING_AUTHOR_1.getId());
+
+        assertThatThrownBy(() -> bookDaoJdbc.getById(EXISTING_BOOK_ID_FOR_AUTHOR_1))
+                .isInstanceOf(BookDaoException.class)
+                .hasMessage("error getting book by id " + EXISTING_BOOK_ID_FOR_AUTHOR_1)
                 .hasCauseInstanceOf(EmptyResultDataAccessException.class);
     }
 

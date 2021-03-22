@@ -33,7 +33,7 @@ public class AuthorDaoJdbc implements AuthorDao {
     @Override
     public Author getById(Long id) {
         try {
-            return jdbcOperations.queryForObject("select * from authors where id = :id",
+            return jdbcOperations.queryForObject("select id, first_name, last_name from authors where id = :id",
                     singletonMap(ID_FILED, id), new AuthorsMapper());
         } catch (DataAccessException ex) {
             throw new AuthorDaoException("error getting author by id " + id, ex);
@@ -42,7 +42,7 @@ public class AuthorDaoJdbc implements AuthorDao {
 
     @Override
     public List<Author> getAll() {
-        return jdbcOperations.query("select * from authors", new AuthorsMapper());
+        return jdbcOperations.query("select id, first_name, last_name from authors", new AuthorsMapper());
     }
 
     @Override
@@ -52,7 +52,7 @@ public class AuthorDaoJdbc implements AuthorDao {
                 "lastName", author.getLastName()));
         try {
             KeyHolder keyHolder = new GeneratedKeyHolder();
-            jdbcOperations.update("insert into authors (`first_name`,`last_name`) values (:firstName, :lastName)",
+            jdbcOperations.update("insert into authors (first_name, last_name) values (:firstName, :lastName)",
                     params, keyHolder);
             return keyHolder.getKeyAs(Long.class);
         } catch (DataAccessException ex) {

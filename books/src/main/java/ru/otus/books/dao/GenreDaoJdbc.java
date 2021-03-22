@@ -32,7 +32,7 @@ public class GenreDaoJdbc implements GenreDao {
     @Override
     public Genre getById(Long id) {
         try {
-            return jdbcOperations.queryForObject("select * from genres where id = :id",
+            return jdbcOperations.queryForObject("select id, title from genres where id = :id",
                     Map.of(ID_FILED, id), new GenreMapper());
         } catch (DataAccessException ex) {
             throw new GenreDaoException("error getting genre by id " + id, ex);
@@ -41,7 +41,7 @@ public class GenreDaoJdbc implements GenreDao {
 
     @Override
     public List<Genre> getAll() {
-        return jdbcOperations.query("select * from genres", new GenreMapper());
+        return jdbcOperations.query("select id, title from genres", new GenreMapper());
     }
 
     @Override
@@ -49,7 +49,7 @@ public class GenreDaoJdbc implements GenreDao {
         SqlParameterSource params = new MapSqlParameterSource(Map.of(TITLE_FILED, genre.getTitle()));
         try {
             KeyHolder keyHolder = new GeneratedKeyHolder();
-            jdbcOperations.update("insert into genres (`title`) values :title", params, keyHolder);
+            jdbcOperations.update("insert into genres (title) values :title", params, keyHolder);
             return keyHolder.getKeyAs(Long.class);
         } catch (DataAccessException ex) {
             throw new GenreDaoException("error during genre creating", ex);
@@ -60,7 +60,7 @@ public class GenreDaoJdbc implements GenreDao {
     public int update(Long id, String title) {
         Map<String, Object> params = Map.of(
                 ID_FILED, id,
-                ID_FILED, title);
+                TITLE_FILED, title);
         try {
             return jdbcOperations.update("update genres set title = :title where id = :id", params);
         } catch (DataAccessException ex) {

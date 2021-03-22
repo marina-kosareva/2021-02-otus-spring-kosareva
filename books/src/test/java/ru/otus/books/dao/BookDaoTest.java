@@ -15,7 +15,7 @@ import ru.otus.books.model.Genre;
 import static org.assertj.core.api.Assertions.*;
 
 @JdbcTest
-@Import({BookDaoJdbc.class, GenreDaoJdbc.class, AuthorDaoJdbc.class})
+@Import({BookDaoJdbc.class})
 class BookDaoTest {
 
     private static final Long NON_EXISTING_BOOK_ID = 100L;
@@ -24,10 +24,6 @@ class BookDaoTest {
 
     @Autowired
     private BookDaoJdbc daoJdbc;
-    @Autowired
-    private GenreDaoJdbc genreDaoJdbc;
-    @Autowired
-    private AuthorDaoJdbc authorDaoJdbc;
 
     private static final Genre EXISTING_GENRE_1 = Genre.builder()
             .id(1L)
@@ -143,30 +139,6 @@ class BookDaoTest {
         assertThatCode(() -> daoJdbc.getById(EXISTING_BOOK_2.getId())).doesNotThrowAnyException();
 
         daoJdbc.deleteById(EXISTING_BOOK_2.getId());
-
-        assertThatThrownBy(() -> daoJdbc.getById(EXISTING_BOOK_2.getId()))
-                .isInstanceOf(BookDaoException.class)
-                .hasMessage("error getting book by id " + EXISTING_BOOK_2.getId())
-                .hasCauseInstanceOf(EmptyResultDataAccessException.class);
-    }
-
-    @Test
-    void shouldDeleteBookIfGenreDeleted() {
-        assertThatCode(() -> daoJdbc.getById(EXISTING_BOOK_2.getId())).doesNotThrowAnyException();
-
-        genreDaoJdbc.deleteById(EXISTING_BOOK_2.getGenre().getId());
-
-        assertThatThrownBy(() -> daoJdbc.getById(EXISTING_BOOK_2.getId()))
-                .isInstanceOf(BookDaoException.class)
-                .hasMessage("error getting book by id " + EXISTING_BOOK_2.getId())
-                .hasCauseInstanceOf(EmptyResultDataAccessException.class);
-    }
-
-    @Test
-    void shouldDeleteBookIfAuthorDeleted() {
-        assertThatCode(() -> daoJdbc.getById(EXISTING_BOOK_2.getId())).doesNotThrowAnyException();
-
-        authorDaoJdbc.deleteById(EXISTING_BOOK_2.getAuthor().getId());
 
         assertThatThrownBy(() -> daoJdbc.getById(EXISTING_BOOK_2.getId()))
                 .isInstanceOf(BookDaoException.class)

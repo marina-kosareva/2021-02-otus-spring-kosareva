@@ -6,6 +6,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import ru.otus.books.exceptions.BookDaoException;
 import ru.otus.books.exceptions.GenreDaoException;
 import ru.otus.books.model.Genre;
 
@@ -14,7 +15,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.*;
 
 @JdbcTest
-@Import(GenreDaoJdbc.class)
+@Import({BookDaoJdbc.class, GenreDaoJdbc.class})
 class GenreDaoTest {
 
     private static final Genre EXISTING_GENRE_1 = Genre.builder()
@@ -26,9 +27,12 @@ class GenreDaoTest {
             .title("title_2")
             .build();
     private static final Long NON_EXISTING_GENRE_ID = 100L;
+    private static final Long EXISTING_BOOK_ID_FOR_GENRE_1 = 2L;
 
     @Autowired
     private GenreDaoJdbc daoJdbc;
+    @Autowired
+    private BookDaoJdbc bookDaoJdbc;
 
     @Test
     void shouldReturnGenreById() {
@@ -106,6 +110,18 @@ class GenreDaoTest {
         assertThatThrownBy(() -> daoJdbc.getById(EXISTING_GENRE_1.getId()))
                 .isInstanceOf(GenreDaoException.class)
                 .hasMessage("error getting genre by id " + EXISTING_GENRE_1.getId())
+                .hasCauseInstanceOf(EmptyResultDataAccessException.class);
+    }
+
+    @Test
+    void shouldDeleteBookIfGenreDeleted() {
+        assertThatCode(() -> bookDaoJdbc.getById(EXISTING_BOOK_ID_FOR_GENRE_1)).doesNotThrowAnyException();
+
+        daoJdbc.deleteById(EXISTING_GENRE_1.getId());
+
+        assertThatThrownBy(() -> bookDaoJdbc.getById(EXISTING_BOOK_ID_FOR_GENRE_1))
+                .isInstanceOf(BookDaoException.class)
+                .hasMessage("error getting book by id " + EXISTING_BOOK_ID_FOR_GENRE_1)
                 .hasCauseInstanceOf(EmptyResultDataAccessException.class);
     }
 }
