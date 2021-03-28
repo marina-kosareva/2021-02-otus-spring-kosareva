@@ -1,29 +1,29 @@
-package ru.otus.books.dao;
+package ru.otus.books.repository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.dao.EmptyResultDataAccessException;
-import ru.otus.books.exceptions.BookDaoException;
+import ru.otus.books.exceptions.BookRepositoryException;
 import ru.otus.books.model.Author;
 import ru.otus.books.model.Book;
 import ru.otus.books.model.Genre;
 
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceException;
+
 import static org.assertj.core.api.Assertions.*;
 
-@JdbcTest
-@Import({BookDaoJdbc.class})
-class BookDaoTest {
+@DataJpaTest
+@Import({DefaultBookRepository.class})
+class BookRepositoryTest {
 
     private static final Long NON_EXISTING_BOOK_ID = 100L;
     private static final Long NON_EXISTING_AUTHOR_ID = 100L;
     private static final Long NON_EXISTING_GENRE_ID = 100L;
 
     @Autowired
-    private BookDaoJdbc daoJdbc;
+    private BookRepository repository;
 
     private static final Genre EXISTING_GENRE_1 = Genre.builder()
             .id(1L)
@@ -58,22 +58,24 @@ class BookDaoTest {
 
     @Test
     void shouldReturnBookById() {
-        assertThat(daoJdbc.getById(EXISTING_BOOK_1.getId())).usingRecursiveComparison()
+        assertThat(repository.getById(EXISTING_BOOK_1.getId()))
+                .usingRecursiveComparison()
                 .isEqualTo(EXISTING_BOOK_1);
     }
 
     @Test
     void shouldThrowExceptionWhileGettingBookByNonExistingId() {
-        assertThatThrownBy(() -> daoJdbc.getById(NON_EXISTING_BOOK_ID))
-                .isInstanceOf(BookDaoException.class)
+        assertThatThrownBy(() -> repository.getById(NON_EXISTING_BOOK_ID))
+                .isInstanceOf(BookRepositoryException.class)
                 .hasMessage("error getting book by id " + NON_EXISTING_BOOK_ID)
-                .hasCauseInstanceOf(EmptyResultDataAccessException.class);
+                .hasCauseInstanceOf(NoResultException.class);
     }
 
     @Test
     void shouldReturnAllBooks() {
-        assertThat(daoJdbc.getAll()).usingRecursiveFieldByFieldElementComparator().containsExactlyInAnyOrder(
-                EXISTING_BOOK_1, EXISTING_BOOK_2);
+        assertThat(repository.getAll())
+                .usingRecursiveFieldByFieldElementComparator()
+                .containsExactlyInAnyOrder(EXISTING_BOOK_1, EXISTING_BOOK_2);
     }
 
     @Test
@@ -83,9 +85,9 @@ class BookDaoTest {
                 .author(EXISTING_AUTHOR_1)
                 .genre(EXISTING_GENRE_1)
                 .build();
-        Long id = daoJdbc.create("new book", EXISTING_GENRE_1.getId(), EXISTING_AUTHOR_1.getId());
+        Book createdBook = repository.create("new book", EXISTING_GENRE_1.getId(), EXISTING_AUTHOR_1.getId());
 
-        assertThat(daoJdbc.getById(id))
+        assertThat(repository.getById(createdBook.getId()))
                 .usingRecursiveComparison()
                 .ignoringFields("id")
                 .isEqualTo(book);
@@ -93,28 +95,28 @@ class BookDaoTest {
 
     @Test
     void shouldThrowExceptionWhileCreatingDuplicateBookTitle() {
-        assertThatThrownBy(() -> daoJdbc.create(EXISTING_BOOK_1.getTitle(), EXISTING_GENRE_1.getId(), EXISTING_AUTHOR_1.getId()))
-                .isInstanceOf(BookDaoException.class)
-                .hasMessage("error during book creating")
-                .hasCauseInstanceOf(DuplicateKeyException.class);
+        assertThatThrownBy(() -> repository.create(EXISTING_BOOK_1.getTitle(), EXISTING_GENRE_1.getId(), EXISTING_AUTHOR_1.getId()))
+                .isInstanceOf(BookRepositoryException.class)
+                .hasMessage("error during book creating Book(id=null, title=title_1, genre=Genre(id=1, title=title_1), author=Author(id=1, firstName=first_name_1, lastName=last_name_1))")
+                .hasCauseInstanceOf(PersistenceException.class);
     }
 
     @Test
     void shouldThrowExceptionWhileCreatingBookWithUnknownGenre() {
-        assertThatThrownBy(() -> daoJdbc.create(EXISTING_BOOK_1.getTitle(), NON_EXISTING_GENRE_ID,
+        assertThatThrownBy(() -> repository.create(EXISTING_BOOK_1.getTitle(), NON_EXISTING_GENRE_ID,
                 EXISTING_AUTHOR_1.getId()))
-                .isInstanceOf(BookDaoException.class)
-                .hasMessage("error during book creating")
-                .hasCauseInstanceOf(DataIntegrityViolationException.class);
+                .isInstanceOf(BookRepositoryException.class)
+                .hasMessage("error during book creating Book(id=null, title=title_1, genre=null, author=Author(id=1, firstName=first_name_1, lastName=last_name_1))")
+                .hasCauseInstanceOf(PersistenceException.class);
     }
 
     @Test
     void shouldThrowExceptionWhileCreatingBookWithUnknownAuthor() {
-        assertThatThrownBy(() -> daoJdbc.create(EXISTING_BOOK_1.getTitle(), EXISTING_GENRE_1.getId(),
+        assertThatThrownBy(() -> repository.create(EXISTING_BOOK_1.getTitle(), EXISTING_GENRE_1.getId(),
                 NON_EXISTING_AUTHOR_ID))
-                .isInstanceOf(BookDaoException.class)
-                .hasMessage("error during book creating")
-                .hasCauseInstanceOf(DataIntegrityViolationException.class);
+                .isInstanceOf(BookRepositoryException.class)
+                .hasMessage("error during book creating Book(id=null, title=title_1, genre=Genre(id=1, title=title_1), author=null)")
+                .hasCauseInstanceOf(PersistenceException.class);
     }
 
     @Test
@@ -126,23 +128,23 @@ class BookDaoTest {
                 .genre(EXISTING_GENRE_2)
                 .build();
 
-        int updatedRows = daoJdbc.update(EXISTING_BOOK_1.getId(), "new title");
+        int updatedRows = repository.update(EXISTING_BOOK_1.getId(), "new title");
 
         assertThat(updatedRows).isEqualTo(1);
-        assertThat(daoJdbc.getById(EXISTING_BOOK_1.getId()))
+        assertThat(repository.getById(EXISTING_BOOK_1.getId()))
                 .usingRecursiveComparison()
                 .isEqualTo(expected);
     }
 
     @Test
     void shouldDeleteBookById() {
-        assertThatCode(() -> daoJdbc.getById(EXISTING_BOOK_2.getId())).doesNotThrowAnyException();
+        assertThatCode(() -> repository.getById(EXISTING_BOOK_2.getId())).doesNotThrowAnyException();
 
-        daoJdbc.deleteById(EXISTING_BOOK_2.getId());
+        repository.deleteById(EXISTING_BOOK_2.getId());
 
-        assertThatThrownBy(() -> daoJdbc.getById(EXISTING_BOOK_2.getId()))
-                .isInstanceOf(BookDaoException.class)
+        assertThatThrownBy(() -> repository.getById(EXISTING_BOOK_2.getId()))
+                .isInstanceOf(BookRepositoryException.class)
                 .hasMessage("error getting book by id " + EXISTING_BOOK_2.getId())
-                .hasCauseInstanceOf(EmptyResultDataAccessException.class);
+                .hasCauseInstanceOf(NoResultException.class);
     }
 }

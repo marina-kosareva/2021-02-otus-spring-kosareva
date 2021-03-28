@@ -26,9 +26,8 @@ public class AuthorsCommands {
     }
 
     @ShellMethod(value = "Create author by firstName and lastName", key = "createAuthor")
-    public String createAuthor(String firstName, String lastName) {
-        Long id = service.create(firstName, lastName);
-        return "successfully created with id = " + id;
+    public Author createAuthor(String firstName, String lastName) {
+        return service.create(firstName, lastName);
     }
 
     @ShellMethod(value = "Update author's firstName, lastName by id", key = "updateAuthor")

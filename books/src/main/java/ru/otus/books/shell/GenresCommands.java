@@ -26,9 +26,8 @@ public class GenresCommands {
     }
 
     @ShellMethod(value = "Create genre by title", key = "createGenre")
-    public String createGenre(String title) {
-        Long id = service.create(title);
-        return "successfully created with id = " + id;
+    public Genre createGenre(String title) {
+        return service.create(title);
     }
 
     @ShellMethod(value = "Update genre's title by id", key = "updateGenre")

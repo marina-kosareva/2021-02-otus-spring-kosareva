@@ -10,7 +10,7 @@ public interface GenreService {
 
     List<Genre> getAll();
 
-    Long create(String title);
+    Genre create(String title);
 
     int update(Long id, String title);
 

@@ -25,9 +25,8 @@ public class BooksCommands {
     }
 
     @ShellMethod(value = "Create book by title, genreId and authorId", key = "createBook")
-    public String createBook(String title, Long genreId, Long authorId) {
-        Long id = service.create(title, genreId, authorId);
-        return "successfully created with id = " + id;
+    public Book createBook(String title, Long genreId, Long authorId) {
+        return service.create(title, genreId, authorId);
     }
 
     @ShellMethod(value = "Update book's title by id", key = "updateBook")

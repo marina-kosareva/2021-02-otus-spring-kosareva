@@ -1,16 +1,16 @@
-package ru.otus.books.dao;
+package ru.otus.books.repository;
 
 import ru.otus.books.model.Author;
 
 import java.util.List;
 
-public interface AuthorDao {
+public interface AuthorRepository {
 
     Author getById(Long id);
 
     List<Author> getAll();
 
-    Long create(Author author);
+    Author create(Author author);
 
     int update(Long id, String firstName, String lastName);
 
