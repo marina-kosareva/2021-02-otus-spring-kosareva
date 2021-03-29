@@ -57,7 +57,7 @@ public class DefaultGenreRepository implements GenreRepository {
     @Override
     public int deleteById(Long id) {
         try {
-            Query query = em.createQuery("delete from Genre a where a.id = :id");
+            Query query = em.createQuery("delete from Genre g where g.id = :id");
             query.setParameter(ID_FILED, id);
             return query.executeUpdate();
         } catch (PersistenceException ex) {

@@ -3,40 +3,43 @@ package ru.otus.books.service;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.otus.books.model.Genre;
-import ru.otus.books.repository.GenreRepository;
+import ru.otus.books.model.Comment;
+import ru.otus.books.repository.CommentRepository;
 
 import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public class DefaultGenreService implements GenreService {
+public class DefaultCommentService implements CommentService {
 
-    private final GenreRepository repository;
+    private final CommentRepository repository;
 
     @Override
-    public Genre getById(Long id) {
+    public Comment getById(Long id) {
         return repository.getById(id);
     }
 
     @Override
-    public List<Genre> getAll() {
+    public List<Comment> getAll() {
         return repository.getAll();
     }
 
     @Override
-    @Transactional
-    public Genre create(String title) {
-        return repository.create(Genre.builder()
-                .title(title)
-                .build());
+    public List<Comment> getByBookId(Long bookId) {
+        return repository.getByBookId(bookId);
     }
 
     @Override
     @Transactional
-    public int update(Long id, String title) {
-        return repository.update(id, title);
+    public Comment create(String text, Long bookId) {
+        return repository.create(text, bookId);
+    }
+
+    @Override
+    @Transactional
+    public int update(Long id, String text) {
+        return repository.update(id, text);
     }
 
     @Override
