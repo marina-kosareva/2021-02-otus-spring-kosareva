@@ -3,6 +3,7 @@ package ru.otus.books.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import ru.otus.books.exceptions.CommentRepositoryException;
 import ru.otus.books.model.Author;
@@ -12,16 +13,14 @@ import ru.otus.books.model.Genre;
 
 import javax.persistence.NoResultException;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @DataJpaTest
 @Import({DefaultCommentRepository.class})
 class CommentRepositoryTest {
 
     private static final Long NON_EXISTING_COMMENT_ID = 100L;
-
-    @Autowired
-    private CommentRepository repository;
 
     private static final Genre EXISTING_GENRE_1 = Genre.builder()
             .id(1L)
@@ -71,6 +70,12 @@ class CommentRepositoryTest {
             .book(EXISTING_BOOK_2)
             .build();
 
+    @Autowired
+    private CommentRepository repository;
+
+    @Autowired
+    private TestEntityManager em;
+
     @Test
     void shouldReturnCommentById() {
         assertThat(repository.getById(EXISTING_COMMENT_1.getId()))
@@ -101,15 +106,14 @@ class CommentRepositoryTest {
 
     @Test
     void shouldCreateComment() {
-        Comment createdComment = repository.create("new comment", EXISTING_BOOK_1.getId());
-
-        Comment expected = Comment.builder()
-                .id(createdComment.getId())
+        Comment comment = Comment.builder()
                 .text("new comment")
                 .book(EXISTING_BOOK_1)
                 .build();
-        assertThat(repository.getById(createdComment.getId()))
-                .isEqualTo(expected);
+        Comment createdComment = repository.create(comment);
+
+        assertThat(em.find(Comment.class, createdComment.getId()))
+                .isEqualTo(comment);
     }
 
     @Test
@@ -120,22 +124,18 @@ class CommentRepositoryTest {
                 .book(EXISTING_BOOK_1)
                 .build();
 
-        int updatedRows = repository.update(EXISTING_COMMENT_1.getId(), "new comment");
-
-        assertThat(updatedRows).isEqualTo(1);
-        assertThat(repository.getById(EXISTING_COMMENT_1.getId()))
+        assertThat(repository.update(EXISTING_COMMENT_1.getId(), "new comment"))
                 .isEqualTo(expected);
     }
 
     @Test
     void shouldDeleteCommentById() {
-        assertThatCode(() -> repository.getById(EXISTING_COMMENT_2.getId())).doesNotThrowAnyException();
+        Comment existing = em.find(Comment.class, EXISTING_COMMENT_2.getId());
+        assertThat(existing).isNotNull();
 
         repository.deleteById(EXISTING_COMMENT_2.getId());
+        em.detach(existing);
 
-        assertThatThrownBy(() -> repository.getById(EXISTING_COMMENT_2.getId()))
-                .isInstanceOf(CommentRepositoryException.class)
-                .hasMessage("error getting comment by id " + EXISTING_COMMENT_2.getId())
-                .hasCauseInstanceOf(NoResultException.class);
+        assertThat(em.find(Comment.class, EXISTING_COMMENT_2.getId())).isNull();
     }
 }

@@ -12,7 +12,7 @@ public interface GenreRepository {
 
     Genre create(Genre genre);
 
-    int update(Long id, String title);
+    Genre update(Long id, String title);
 
     int deleteById(Long id);
 }

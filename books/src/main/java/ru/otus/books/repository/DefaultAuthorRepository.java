@@ -4,8 +4,13 @@ import org.springframework.stereotype.Repository;
 import ru.otus.books.exceptions.AuthorRepositoryException;
 import ru.otus.books.model.Author;
 
-import javax.persistence.*;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
+import javax.persistence.Query;
 import java.util.List;
+
+import static java.util.Optional.ofNullable;
 
 @Repository
 public class DefaultAuthorRepository implements AuthorRepository {
@@ -17,13 +22,8 @@ public class DefaultAuthorRepository implements AuthorRepository {
 
     @Override
     public Author getById(Long id) {
-        TypedQuery<Author> query = em.createQuery("select a from Author a where a.id = :id", Author.class);
-        query.setParameter(ID_FILED, id);
-        try {
-            return query.getSingleResult();
-        } catch (NoResultException ex) {
-            throw new AuthorRepositoryException("error getting author by id " + id, ex);
-        }
+        return ofNullable(em.find(Author.class, id))
+                .orElseThrow(() -> new AuthorRepositoryException("error getting author by id " + id));
     }
 
     @Override
@@ -42,13 +42,13 @@ public class DefaultAuthorRepository implements AuthorRepository {
     }
 
     @Override
-    public int update(Long id, String firstName, String lastName) {
+    public Author update(Long id, String firstName, String lastName) {
         try {
-            Query query = em.createQuery("update Author a set a.firstName = :firstName, a.lastName = :lastName where a.id = :id");
-            query.setParameter(ID_FILED, id);
-            query.setParameter("firstName", firstName);
-            query.setParameter("lastName", lastName);
-            return query.executeUpdate();
+            return em.merge(Author.builder()
+                    .id(getById(id).getId())
+                    .firstName(firstName)
+                    .lastName(lastName)
+                    .build());
         } catch (PersistenceException ex) {
             throw new AuthorRepositoryException("error during author updating ", ex);
         }

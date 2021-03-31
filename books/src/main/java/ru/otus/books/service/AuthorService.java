@@ -12,7 +12,7 @@ public interface AuthorService {
 
     Author create(String firstName, String lastName);
 
-    int update(Long id, String firstName, String lastName);
+    Author update(Long id, String firstName, String lastName);
 
     int deleteById(Long id);
 }

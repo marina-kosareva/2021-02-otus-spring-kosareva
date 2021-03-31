@@ -3,10 +3,10 @@ package ru.otus.books.service;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.otus.books.model.Genre;
 import ru.otus.books.repository.GenreRepository;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
@@ -16,11 +16,13 @@ public class DefaultGenreService implements GenreService {
     private final GenreRepository repository;
 
     @Override
+    @Transactional(readOnly = true)
     public Genre getById(Long id) {
         return repository.getById(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Genre> getAll() {
         return repository.getAll();
     }
@@ -35,7 +37,7 @@ public class DefaultGenreService implements GenreService {
 
     @Override
     @Transactional
-    public int update(Long id, String title) {
+    public Genre update(Long id, String title) {
         return repository.update(id, title);
     }
 

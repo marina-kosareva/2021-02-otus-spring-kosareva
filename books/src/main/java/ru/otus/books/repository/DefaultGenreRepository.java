@@ -4,27 +4,26 @@ import org.springframework.stereotype.Repository;
 import ru.otus.books.exceptions.GenreRepositoryException;
 import ru.otus.books.model.Genre;
 
-import javax.persistence.*;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
+import javax.persistence.Query;
 import java.util.List;
+
+import static java.util.Optional.ofNullable;
 
 @Repository
 public class DefaultGenreRepository implements GenreRepository {
 
     private static final String ID_FILED = "id";
-    private static final String TITLE_FILED = "title";
 
     @PersistenceContext
     private EntityManager em;
 
     @Override
     public Genre getById(Long id) {
-        TypedQuery<Genre> query = em.createQuery("select g from Genre g where g.id = :id", Genre.class);
-        query.setParameter(ID_FILED, id);
-        try {
-            return query.getSingleResult();
-        } catch (NoResultException ex) {
-            throw new GenreRepositoryException("error getting genre by id " + id, ex);
-        }
+        return ofNullable(em.find(Genre.class, id))
+                .orElseThrow(() -> new GenreRepositoryException("error getting genre by id " + id));
     }
 
     @Override
@@ -43,12 +42,12 @@ public class DefaultGenreRepository implements GenreRepository {
     }
 
     @Override
-    public int update(Long id, String title) {
+    public Genre update(Long id, String title) {
         try {
-            Query query = em.createQuery("update Genre g set g.title = :title where g.id = :id");
-            query.setParameter(ID_FILED, id);
-            query.setParameter(TITLE_FILED, title);
-            return query.executeUpdate();
+            return em.merge(Genre.builder()
+                    .id(getById(id).getId())
+                    .title(title)
+                    .build());
         } catch (PersistenceException ex) {
             throw new GenreRepositoryException("error during genre updating ", ex);
         }

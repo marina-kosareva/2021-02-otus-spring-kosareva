@@ -12,7 +12,7 @@ public interface AuthorRepository {
 
     Author create(Author author);
 
-    int update(Long id, String firstName, String lastName);
+    Author update(Long id, String firstName, String lastName);
 
     int deleteById(Long id);
 }

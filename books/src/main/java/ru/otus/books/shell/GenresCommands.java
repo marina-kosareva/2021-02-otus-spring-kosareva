@@ -31,10 +31,8 @@ public class GenresCommands {
     }
 
     @ShellMethod(value = "Update genre's title by id", key = "updateGenre")
-    public String updateGenre(Long id, String title) {
-        return service.update(id, title) == 1
-                ? "successfully updated"
-                : "not updated: possible the genre with this id does not exist";
+    public Genre updateGenre(Long id, String title) {
+        return service.update(id, title);
     }
 
     @ShellMethod(value = "Delete genre by id", key = "deleteGenre")

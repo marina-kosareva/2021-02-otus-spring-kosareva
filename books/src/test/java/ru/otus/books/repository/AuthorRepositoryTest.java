@@ -3,21 +3,20 @@ package ru.otus.books.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import ru.otus.books.exceptions.AuthorRepositoryException;
-import ru.otus.books.exceptions.BookRepositoryException;
 import ru.otus.books.model.Author;
+import ru.otus.books.model.Book;
 
-import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @DataJpaTest
-@Import({DefaultBookRepository.class, DefaultAuthorRepository.class})
+@Import({DefaultAuthorRepository.class})
 class AuthorRepositoryTest {
 
     private static final Author EXISTING_AUTHOR_1 = Author.builder()
@@ -34,14 +33,15 @@ class AuthorRepositoryTest {
     private static final Long EXISTING_BOOK_ID_FOR_AUTHOR_1 = 1L;
 
     @Autowired
-    private BookRepository bookRepository;
+    private AuthorRepository repository;
 
     @Autowired
-    private AuthorRepository repository;
+    private TestEntityManager em;
 
     @Test
     void shouldReturnAuthorById() {
-        assertThat(repository.getById(EXISTING_AUTHOR_1.getId())).usingRecursiveComparison()
+        assertThat(repository.getById(EXISTING_AUTHOR_1.getId()))
+                .usingRecursiveComparison()
                 .isEqualTo(EXISTING_AUTHOR_1);
     }
 
@@ -49,8 +49,7 @@ class AuthorRepositoryTest {
     void shouldThrowExceptionWhileGettingAuthorByNonExistingId() {
         assertThatThrownBy(() -> repository.getById(NON_EXISTING_AUTHOR_ID))
                 .isInstanceOf(AuthorRepositoryException.class)
-                .hasMessage("error getting author by id " + NON_EXISTING_AUTHOR_ID)
-                .hasCauseInstanceOf(NoResultException.class);
+                .hasMessage("error getting author by id " + NON_EXISTING_AUTHOR_ID);
     }
 
     @Test
@@ -66,9 +65,8 @@ class AuthorRepositoryTest {
 
         Author createdAuthor = repository.create(author);
 
-        assertThat(repository.getById(createdAuthor.getId()))
+        assertThat(em.find(Author.class, createdAuthor.getId()))
                 .usingRecursiveComparison()
-                .ignoringFields("id")
                 .isEqualTo(author);
     }
 
@@ -85,44 +83,39 @@ class AuthorRepositoryTest {
     @Test
     void shouldUpdateAuthor() {
         Author expected = author(EXISTING_AUTHOR_1.getId(), "Ivan", "Ivanov");
-        int updatedRows = repository.update(EXISTING_AUTHOR_1.getId(), "Ivan", "Ivanov");
-
-        assertThat(updatedRows).isEqualTo(1);
-        assertThat(repository.getById(EXISTING_AUTHOR_1.getId()))
+        assertThat(repository.update(EXISTING_AUTHOR_1.getId(), "Ivan", "Ivanov"))
                 .usingRecursiveComparison()
                 .isEqualTo(expected);
     }
 
     @Test
     void shouldNotUpdateAuthor() {
-        int updatedRows = repository.update(NON_EXISTING_AUTHOR_ID, "Ivan", "Ivanov");
-        assertThat(updatedRows).isZero();
+        assertThatThrownBy(() -> repository.update(NON_EXISTING_AUTHOR_ID, "Ivan", "Ivanov"))
+                .isInstanceOf(AuthorRepositoryException.class)
+                .hasMessage("error getting author by id " + NON_EXISTING_AUTHOR_ID);
     }
 
     @Test
     void shouldDeleteAuthorById() {
-        assertThat(repository.getById(EXISTING_AUTHOR_1.getId()))
-                .usingRecursiveComparison()
-                .isEqualTo(EXISTING_AUTHOR_1);
+        Author existing = em.find(Author.class, EXISTING_AUTHOR_1.getId());
+        assertThat(existing).isNotNull();
 
         assertThat(repository.deleteById(EXISTING_AUTHOR_1.getId())).isEqualTo(1);
 
-        assertThatThrownBy(() -> repository.getById(NON_EXISTING_AUTHOR_ID))
-                .isInstanceOf(AuthorRepositoryException.class)
-                .hasMessage("error getting author by id " + NON_EXISTING_AUTHOR_ID)
-                .hasCauseInstanceOf(NoResultException.class);
+        em.detach(existing);
+        assertThat(em.find(Author.class, EXISTING_AUTHOR_1.getId())).isNull();
     }
 
     @Test
     void shouldDeleteBookIfAuthorDeleted() {
-        assertThatCode(() -> bookRepository.getById(EXISTING_BOOK_ID_FOR_AUTHOR_1)).doesNotThrowAnyException();
+        Book existing = em.find(Book.class, EXISTING_BOOK_ID_FOR_AUTHOR_1);
+        assertThat(existing).isNotNull();
 
         repository.deleteById(EXISTING_AUTHOR_1.getId());
 
-        assertThatThrownBy(() -> bookRepository.getById(EXISTING_BOOK_ID_FOR_AUTHOR_1))
-                .isInstanceOf(BookRepositoryException.class)
-                .hasMessage("error getting book by id " + EXISTING_BOOK_ID_FOR_AUTHOR_1)
-                .hasCauseInstanceOf(NoResultException.class);
+        em.detach(existing);
+        assertThat(em.find(Book.class, EXISTING_BOOK_ID_FOR_AUTHOR_1)).isNull();
+
     }
 
     private Author author(String firstName, String lastName) {

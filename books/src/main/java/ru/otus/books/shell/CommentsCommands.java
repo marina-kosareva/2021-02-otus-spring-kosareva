@@ -35,10 +35,8 @@ public class CommentsCommands {
     }
 
     @ShellMethod(value = "Update comment's text by id", key = "updateComment")
-    public String updateComment(Long id, String text) {
-        return service.update(id, text) == 1
-                ? "successfully updated"
-                : "not updated: possible the comment with this id does not exist";
+    public Comment updateComment(Long id, String text) {
+        return service.update(id, text);
     }
 
     @ShellMethod(value = "Delete comment by id", key = "deleteComment")

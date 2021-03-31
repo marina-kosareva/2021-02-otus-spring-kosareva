@@ -10,9 +10,9 @@ public interface BookRepository {
 
     List<Book> getAll();
 
-    Book create(String title, Long genreId, Long authorId);
+    Book create(Book book);
 
-    int update(Long id, String title);
+    Book update(Long id, String title);
 
     int deleteById(Long id);
 }

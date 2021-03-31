@@ -2,7 +2,6 @@ package ru.otus.books.repository;
 
 import org.springframework.stereotype.Repository;
 import ru.otus.books.exceptions.CommentRepositoryException;
-import ru.otus.books.model.Book;
 import ru.otus.books.model.Comment;
 
 import javax.persistence.*;
@@ -46,11 +45,7 @@ public class DefaultCommentRepository implements CommentRepository {
     }
 
     @Override
-    public Comment create(String text, Long bookId) {
-        Comment comment = Comment.builder()
-                .text(text)
-                .book(em.find(Book.class, bookId))
-                .build();
+    public Comment create(Comment comment) {
         try {
             em.persist(comment);
             return comment;
@@ -60,12 +55,14 @@ public class DefaultCommentRepository implements CommentRepository {
     }
 
     @Override
-    public int update(Long id, String text) {
+    public Comment update(Long id, String text) {
+        Comment existing = getById(id);
         try {
-            Query query = em.createQuery("update Comment c set c.text = :text where c.id = :id");
-            query.setParameter(ID_FILED, id);
-            query.setParameter(TEXT_FILED, text);
-            return query.executeUpdate();
+            return em.merge(Comment.builder()
+                    .id(getById(id).getId())
+                    .text(text)
+                    .book(existing.getBook())
+                    .build());
         } catch (PersistenceException ex) {
             throw new CommentRepositoryException("error during comment updating ", ex);
         }

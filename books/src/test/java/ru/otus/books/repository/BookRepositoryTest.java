@@ -3,6 +3,7 @@ package ru.otus.books.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import ru.otus.books.exceptions.BookRepositoryException;
 import ru.otus.books.model.Author;
@@ -12,18 +13,14 @@ import ru.otus.books.model.Genre;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @DataJpaTest
 @Import({DefaultBookRepository.class})
 class BookRepositoryTest {
 
     private static final Long NON_EXISTING_BOOK_ID = 100L;
-    private static final Long NON_EXISTING_AUTHOR_ID = 100L;
-    private static final Long NON_EXISTING_GENRE_ID = 100L;
-
-    @Autowired
-    private BookRepository repository;
 
     private static final Genre EXISTING_GENRE_1 = Genre.builder()
             .id(1L)
@@ -55,6 +52,11 @@ class BookRepositoryTest {
             .author(EXISTING_AUTHOR_2)
             .genre(EXISTING_GENRE_1)
             .build();
+    @Autowired
+    private BookRepository repository;
+
+    @Autowired
+    private TestEntityManager em;
 
     @Test
     void shouldReturnBookById() {
@@ -85,37 +87,24 @@ class BookRepositoryTest {
                 .author(EXISTING_AUTHOR_1)
                 .genre(EXISTING_GENRE_1)
                 .build();
-        Book createdBook = repository.create("new book", EXISTING_GENRE_1.getId(), EXISTING_AUTHOR_1.getId());
 
-        assertThat(repository.getById(createdBook.getId()))
+        Book createdBook = repository.create(book);
+
+        assertThat(em.find(Book.class, createdBook.getId()))
                 .usingRecursiveComparison()
-                .ignoringFields("id")
                 .isEqualTo(book);
     }
 
     @Test
     void shouldThrowExceptionWhileCreatingDuplicateBookTitle() {
-        assertThatThrownBy(() -> repository.create(EXISTING_BOOK_1.getTitle(), EXISTING_GENRE_1.getId(), EXISTING_AUTHOR_1.getId()))
+        Book book = Book.builder()
+                .title(EXISTING_BOOK_1.getTitle())
+                .author(EXISTING_AUTHOR_1)
+                .genre(EXISTING_GENRE_1)
+                .build();
+        assertThatThrownBy(() -> repository.create(book))
                 .isInstanceOf(BookRepositoryException.class)
                 .hasMessage("error during book creating Book(id=null, title=title_1, genre=Genre(id=1, title=title_1), author=Author(id=1, firstName=first_name_1, lastName=last_name_1))")
-                .hasCauseInstanceOf(PersistenceException.class);
-    }
-
-    @Test
-    void shouldThrowExceptionWhileCreatingBookWithUnknownGenre() {
-        assertThatThrownBy(() -> repository.create(EXISTING_BOOK_1.getTitle(), NON_EXISTING_GENRE_ID,
-                EXISTING_AUTHOR_1.getId()))
-                .isInstanceOf(BookRepositoryException.class)
-                .hasMessage("error during book creating Book(id=null, title=title_1, genre=null, author=Author(id=1, firstName=first_name_1, lastName=last_name_1))")
-                .hasCauseInstanceOf(PersistenceException.class);
-    }
-
-    @Test
-    void shouldThrowExceptionWhileCreatingBookWithUnknownAuthor() {
-        assertThatThrownBy(() -> repository.create(EXISTING_BOOK_1.getTitle(), EXISTING_GENRE_1.getId(),
-                NON_EXISTING_AUTHOR_ID))
-                .isInstanceOf(BookRepositoryException.class)
-                .hasMessage("error during book creating Book(id=null, title=title_1, genre=Genre(id=1, title=title_1), author=null)")
                 .hasCauseInstanceOf(PersistenceException.class);
     }
 
@@ -124,27 +113,22 @@ class BookRepositoryTest {
         Book expected = Book.builder()
                 .id(EXISTING_BOOK_1.getId())
                 .title("new title")
-                .author(EXISTING_AUTHOR_1)
-                .genre(EXISTING_GENRE_2)
+                .author(EXISTING_BOOK_1.getAuthor())
+                .genre(EXISTING_BOOK_1.getGenre())
                 .build();
 
-        int updatedRows = repository.update(EXISTING_BOOK_1.getId(), "new title");
-
-        assertThat(updatedRows).isEqualTo(1);
-        assertThat(repository.getById(EXISTING_BOOK_1.getId()))
-                .usingRecursiveComparison()
+        assertThat(repository.update(EXISTING_BOOK_1.getId(), "new title"))
                 .isEqualTo(expected);
     }
 
     @Test
     void shouldDeleteBookById() {
-        assertThatCode(() -> repository.getById(EXISTING_BOOK_2.getId())).doesNotThrowAnyException();
+        Book existing = em.find(Book.class, EXISTING_BOOK_2.getId());
+        assertThat(existing).isNotNull();
 
         repository.deleteById(EXISTING_BOOK_2.getId());
+        em.detach(existing);
 
-        assertThatThrownBy(() -> repository.getById(EXISTING_BOOK_2.getId()))
-                .isInstanceOf(BookRepositoryException.class)
-                .hasMessage("error getting book by id " + EXISTING_BOOK_2.getId())
-                .hasCauseInstanceOf(NoResultException.class);
+        assertThat(em.find(Book.class, EXISTING_BOOK_2.getId())).isNull();
     }
 }

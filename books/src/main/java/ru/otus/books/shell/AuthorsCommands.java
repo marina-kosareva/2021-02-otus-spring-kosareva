@@ -31,10 +31,8 @@ public class AuthorsCommands {
     }
 
     @ShellMethod(value = "Update author's firstName, lastName by id", key = "updateAuthor")
-    public String updateAuthor(Long id, String firstName, String lastName) {
-        return service.update(id, firstName, lastName) == 1
-                ? "successfully updated"
-                : "not updated: possible the author with this id does not exist";
+    public Author updateAuthor(Long id, String firstName, String lastName) {
+        return service.update(id, firstName, lastName);
     }
 
     @ShellMethod(value = "Delete author by id", key = "deleteAuthor")

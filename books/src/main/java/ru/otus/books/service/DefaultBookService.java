@@ -3,10 +3,10 @@ package ru.otus.books.service;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.otus.books.model.Book;
 import ru.otus.books.repository.BookRepository;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
@@ -14,13 +14,17 @@ import java.util.List;
 public class DefaultBookService implements BookService {
 
     private final BookRepository repository;
+    private final AuthorService authorService;
+    private final GenreService genreService;
 
     @Override
+    @Transactional(readOnly = true)
     public Book getById(Long id) {
         return repository.getById(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Book> getAll() {
         return repository.getAll();
     }
@@ -28,12 +32,16 @@ public class DefaultBookService implements BookService {
     @Override
     @Transactional
     public Book create(String title, Long genreId, Long authorId) {
-        return repository.create(title, genreId, authorId);
+        return repository.create(Book.builder()
+                .title(title)
+                .author(authorService.getById(authorId))
+                .genre(genreService.getById(genreId))
+                .build());
     }
 
     @Override
     @Transactional
-    public int update(Long id, String title) {
+    public Book update(Long id, String title) {
         return repository.update(id, title);
     }
 
