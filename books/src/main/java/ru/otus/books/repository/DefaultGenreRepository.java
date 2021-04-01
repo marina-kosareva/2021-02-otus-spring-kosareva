@@ -42,12 +42,9 @@ public class DefaultGenreRepository implements GenreRepository {
     }
 
     @Override
-    public Genre update(Long id, String title) {
+    public Genre update(Genre genre) {
         try {
-            return em.merge(Genre.builder()
-                    .id(getById(id).getId())
-                    .title(title)
-                    .build());
+            return em.merge(genre);
         } catch (PersistenceException ex) {
             throw new GenreRepositoryException("error during genre updating ", ex);
         }

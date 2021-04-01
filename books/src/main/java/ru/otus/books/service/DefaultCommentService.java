@@ -46,7 +46,9 @@ public class DefaultCommentService implements CommentService {
     @Override
     @Transactional
     public Comment update(Long id, String text) {
-        return repository.update(id, text);
+        Comment existing = getById(id);
+        existing.setText(text);
+        return repository.update(existing);
     }
 
     @Override

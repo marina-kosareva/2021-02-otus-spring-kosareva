@@ -82,17 +82,16 @@ class AuthorRepositoryTest {
 
     @Test
     void shouldUpdateAuthor() {
+        Author existing = em.find(Author.class, EXISTING_AUTHOR_1.getId());
+        existing.setLastName("Ivanov");
+        existing.setFirstName("Ivan");
+
         Author expected = author(EXISTING_AUTHOR_1.getId(), "Ivan", "Ivanov");
-        assertThat(repository.update(EXISTING_AUTHOR_1.getId(), "Ivan", "Ivanov"))
+        repository.update(existing);
+
+        assertThat(em.find(Author.class, EXISTING_AUTHOR_1.getId()))
                 .usingRecursiveComparison()
                 .isEqualTo(expected);
-    }
-
-    @Test
-    void shouldNotUpdateAuthor() {
-        assertThatThrownBy(() -> repository.update(NON_EXISTING_AUTHOR_ID, "Ivan", "Ivanov"))
-                .isInstanceOf(AuthorRepositoryException.class)
-                .hasMessage("error getting author by id " + NON_EXISTING_AUTHOR_ID);
     }
 
     @Test

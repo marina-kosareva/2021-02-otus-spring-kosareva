@@ -42,13 +42,9 @@ public class DefaultAuthorRepository implements AuthorRepository {
     }
 
     @Override
-    public Author update(Long id, String firstName, String lastName) {
+    public Author update(Author author) {
         try {
-            return em.merge(Author.builder()
-                    .id(getById(id).getId())
-                    .firstName(firstName)
-                    .lastName(lastName)
-                    .build());
+            return em.merge(author);
         } catch (PersistenceException ex) {
             throw new AuthorRepositoryException("error during author updating ", ex);
         }

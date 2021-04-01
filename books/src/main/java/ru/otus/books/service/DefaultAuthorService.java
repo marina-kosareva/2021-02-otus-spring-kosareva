@@ -39,7 +39,10 @@ public class DefaultAuthorService implements AuthorService {
     @Override
     @Transactional
     public Author update(Long id, String firstName, String lastName) {
-        return repository.update(id, firstName, lastName);
+        Author existing = getById(id);
+        existing.setFirstName(firstName);
+        existing.setLastName(lastName);
+        return repository.update(existing);
     }
 
     @Override

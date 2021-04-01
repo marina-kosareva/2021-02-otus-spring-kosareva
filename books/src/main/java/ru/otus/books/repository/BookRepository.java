@@ -12,7 +12,7 @@ public interface BookRepository {
 
     Book create(Book book);
 
-    Book update(Long id, String title);
+    Book update(Book book);
 
     int deleteById(Long id);
 }

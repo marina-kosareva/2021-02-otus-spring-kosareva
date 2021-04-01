@@ -48,15 +48,9 @@ public class DefaultBookRepository implements BookRepository {
     }
 
     @Override
-    public Book update(Long id, String title) {
-        Book existing = getById(id);
+    public Book update(Book book) {
         try {
-            return em.merge(Book.builder()
-                    .id(getById(id).getId())
-                    .title(title)
-                    .author(existing.getAuthor())
-                    .genre(existing.getGenre())
-                    .build());
+            return em.merge(book);
         } catch (PersistenceException ex) {
             throw new AuthorRepositoryException("error during book updating ", ex);
         }

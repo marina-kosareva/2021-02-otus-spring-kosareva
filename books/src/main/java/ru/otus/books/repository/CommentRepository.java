@@ -14,7 +14,7 @@ public interface CommentRepository {
 
     Comment create(Comment comment);
 
-    Comment update(Long id, String text);
+    Comment update(Comment comment);
 
     int deleteById(Long id);
 }

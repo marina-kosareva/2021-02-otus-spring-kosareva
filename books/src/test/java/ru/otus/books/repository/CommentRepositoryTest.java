@@ -118,14 +118,15 @@ class CommentRepositoryTest {
 
     @Test
     void shouldUpdateComment() {
+        Comment existing = em.find(Comment.class, EXISTING_COMMENT_1.getId());
+        existing.setText("new comment");
         Comment expected = Comment.builder()
                 .id(EXISTING_COMMENT_1.getId())
                 .text("new comment")
                 .book(EXISTING_BOOK_1)
                 .build();
-
-        assertThat(repository.update(EXISTING_COMMENT_1.getId(), "new comment"))
-                .isEqualTo(expected);
+        repository.update(existing);
+        assertThat(em.find(Comment.class, EXISTING_COMMENT_1.getId())).isEqualTo(expected);
     }
 
     @Test

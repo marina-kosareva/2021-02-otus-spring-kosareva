@@ -55,14 +55,9 @@ public class DefaultCommentRepository implements CommentRepository {
     }
 
     @Override
-    public Comment update(Long id, String text) {
-        Comment existing = getById(id);
+    public Comment update(Comment comment) {
         try {
-            return em.merge(Comment.builder()
-                    .id(getById(id).getId())
-                    .text(text)
-                    .book(existing.getBook())
-                    .build());
+            return em.merge(comment);
         } catch (PersistenceException ex) {
             throw new CommentRepositoryException("error during comment updating ", ex);
         }

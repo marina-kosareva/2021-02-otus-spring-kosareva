@@ -110,15 +110,16 @@ class BookRepositoryTest {
 
     @Test
     void shouldUpdateBook() {
+        Book existing = em.find(Book.class, EXISTING_BOOK_1.getId());
+        existing.setTitle("new title");
         Book expected = Book.builder()
                 .id(EXISTING_BOOK_1.getId())
                 .title("new title")
                 .author(EXISTING_BOOK_1.getAuthor())
                 .genre(EXISTING_BOOK_1.getGenre())
                 .build();
-
-        assertThat(repository.update(EXISTING_BOOK_1.getId(), "new title"))
-                .isEqualTo(expected);
+        repository.update(existing);
+        assertThat(em.find(Book.class, EXISTING_BOOK_1.getId())).isEqualTo(expected);
     }
 
     @Test

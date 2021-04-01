@@ -42,7 +42,9 @@ public class DefaultBookService implements BookService {
     @Override
     @Transactional
     public Book update(Long id, String title) {
-        return repository.update(id, title);
+        Book existing = getById(id);
+        existing.setTitle(title);
+        return repository.update(existing);
     }
 
     @Override

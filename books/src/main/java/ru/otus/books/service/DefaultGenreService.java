@@ -38,7 +38,9 @@ public class DefaultGenreService implements GenreService {
     @Override
     @Transactional
     public Genre update(Long id, String title) {
-        return repository.update(id, title);
+        Genre existing = getById(id);
+        existing.setTitle(title);
+        return repository.update(existing);
     }
 
     @Override

@@ -83,20 +83,17 @@ class GenreRepositoryTest {
 
     @Test
     void shouldUpdateGenre() {
+        Genre existing = em.find(Genre.class, EXISTING_GENRE_1.getId());
+        existing.setTitle("new title");
+
         Genre expected = Genre.builder()
                 .id(EXISTING_GENRE_1.getId())
                 .title("new title")
                 .build();
-        assertThat(repository.update(EXISTING_GENRE_1.getId(), "new title"))
+        repository.update(existing);
+        assertThat(em.find(Genre.class, EXISTING_GENRE_1.getId()))
                 .usingRecursiveComparison()
                 .isEqualTo(expected);
-    }
-
-    @Test
-    void shouldNotUpdateGenre() {
-        assertThatThrownBy(() -> repository.update(NON_EXISTING_GENRE_ID, "new title"))
-                .isInstanceOf(GenreRepositoryException.class)
-                .hasMessage("error getting genre by id " + NON_EXISTING_GENRE_ID);
     }
 
     @Test
