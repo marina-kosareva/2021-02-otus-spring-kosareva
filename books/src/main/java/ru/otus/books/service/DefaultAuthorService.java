@@ -3,8 +3,9 @@ package ru.otus.books.service;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.otus.books.dao.AuthorDao;
+import org.springframework.transaction.annotation.Transactional;
 import ru.otus.books.model.Author;
+import ru.otus.books.repository.AuthorRepository;
 
 import java.util.List;
 
@@ -12,33 +13,41 @@ import java.util.List;
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class DefaultAuthorService implements AuthorService {
 
-    private final AuthorDao dao;
+    private final AuthorRepository repository;
 
     @Override
+    @Transactional(readOnly = true)
     public Author getById(Long id) {
-        return dao.getById(id);
+        return repository.getById(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Author> getAll() {
-        return dao.getAll();
+        return repository.getAll();
     }
 
     @Override
-    public Long create(String firstName, String lastName) {
-        return dao.create(Author.builder()
+    @Transactional
+    public Author create(String firstName, String lastName) {
+        return repository.create(Author.builder()
                 .firstName(firstName)
                 .lastName(lastName)
                 .build());
     }
 
     @Override
-    public int update(Long id, String firstName, String lastName) {
-        return dao.update(id, firstName, lastName);
+    @Transactional
+    public Author update(Long id, String firstName, String lastName) {
+        Author existing = getById(id);
+        existing.setFirstName(firstName);
+        existing.setLastName(lastName);
+        return repository.update(existing);
     }
 
     @Override
+    @Transactional
     public int deleteById(Long id) {
-        return dao.deleteById(id);
+        return repository.deleteById(id);
     }
 }

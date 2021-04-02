@@ -10,9 +10,9 @@ public interface BookService {
 
     List<Book> getAll();
 
-    Long create(String title, Long genreId, Long authorId);
+    Book create(String title, Long genreId, Long authorId);
 
-    int update(Long id, String title);
+    Book update(Long id, String title);
 
     int deleteById(Long id);
 }

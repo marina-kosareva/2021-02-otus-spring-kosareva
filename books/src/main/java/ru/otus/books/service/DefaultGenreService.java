@@ -3,8 +3,9 @@ package ru.otus.books.service;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.otus.books.dao.GenreDao;
+import org.springframework.transaction.annotation.Transactional;
 import ru.otus.books.model.Genre;
+import ru.otus.books.repository.GenreRepository;
 
 import java.util.List;
 
@@ -12,32 +13,39 @@ import java.util.List;
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class DefaultGenreService implements GenreService {
 
-    private final GenreDao dao;
+    private final GenreRepository repository;
 
     @Override
+    @Transactional(readOnly = true)
     public Genre getById(Long id) {
-        return dao.getById(id);
+        return repository.getById(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Genre> getAll() {
-        return dao.getAll();
+        return repository.getAll();
     }
 
     @Override
-    public Long create(String title) {
-        return dao.create(Genre.builder()
+    @Transactional
+    public Genre create(String title) {
+        return repository.create(Genre.builder()
                 .title(title)
                 .build());
     }
 
     @Override
-    public int update(Long id, String title) {
-        return dao.update(id, title);
+    @Transactional
+    public Genre update(Long id, String title) {
+        Genre existing = getById(id);
+        existing.setTitle(title);
+        return repository.update(existing);
     }
 
     @Override
+    @Transactional
     public int deleteById(Long id) {
-        return dao.deleteById(id);
+        return repository.deleteById(id);
     }
 }

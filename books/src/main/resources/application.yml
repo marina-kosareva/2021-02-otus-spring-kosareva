@@ -7,3 +7,8 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/schema, classpath:db/data
+  jpa:
+    hibernate:
+      use-new-id-generator-mappings: true
+      ddl-auto: validate
+    show-sql: true

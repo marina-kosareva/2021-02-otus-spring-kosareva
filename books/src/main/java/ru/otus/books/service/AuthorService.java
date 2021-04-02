@@ -10,9 +10,9 @@ public interface AuthorService {
 
     List<Author> getAll();
 
-    Long create(String firstName, String lastName);
+    Author create(String firstName, String lastName);
 
-    int update(Long id, String firstName, String lastName);
+    Author update(Long id, String firstName, String lastName);
 
     int deleteById(Long id);
 }
