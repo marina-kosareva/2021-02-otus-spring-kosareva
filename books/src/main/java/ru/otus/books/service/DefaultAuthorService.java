@@ -2,8 +2,10 @@ package ru.otus.books.service;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.otus.books.exceptions.AuthorRepositoryException;
 import ru.otus.books.model.Author;
 import ru.otus.books.repository.AuthorRepository;
 
@@ -18,36 +20,43 @@ public class DefaultAuthorService implements AuthorService {
     @Override
     @Transactional(readOnly = true)
     public Author getById(Long id) {
-        return repository.getById(id);
+        return repository.findById(id)
+                .orElseThrow(() -> new AuthorRepositoryException("error getting author by id " + id));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Author> getAll() {
-        return repository.getAll();
+        return repository.findAll();
     }
 
     @Override
-    @Transactional
     public Author create(String firstName, String lastName) {
-        return repository.create(Author.builder()
-                .firstName(firstName)
-                .lastName(lastName)
-                .build());
+        try {
+            return repository.save(Author.builder()
+                    .firstName(firstName)
+                    .lastName(lastName)
+                    .build());
+        } catch (DataIntegrityViolationException ex) {
+            throw new AuthorRepositoryException("error during author creating", ex);
+        }
     }
 
     @Override
     @Transactional
     public Author update(Long id, String firstName, String lastName) {
-        Author existing = getById(id);
-        existing.setFirstName(firstName);
-        existing.setLastName(lastName);
-        return repository.update(existing);
+        try {
+            Author existing = getById(id);
+            existing.setFirstName(firstName);
+            existing.setLastName(lastName);
+            return repository.saveAndFlush(existing);
+        } catch (DataIntegrityViolationException ex) {
+            throw new AuthorRepositoryException("error during author updating", ex);
+        }
     }
 
     @Override
-    @Transactional
-    public int deleteById(Long id) {
-        return repository.deleteById(id);
+    public void deleteById(Long id) {
+        repository.deleteById(id);
     }
 }

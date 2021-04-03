@@ -1,18 +1,8 @@
 package ru.otus.books.repository;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import ru.otus.books.model.Author;
 
-import java.util.List;
+public interface AuthorRepository extends JpaRepository<Author, Long> {
 
-public interface AuthorRepository {
-
-    Author getById(Long id);
-
-    List<Author> getAll();
-
-    Author create(Author author);
-
-    Author update(Author author);
-
-    int deleteById(Long id);
 }

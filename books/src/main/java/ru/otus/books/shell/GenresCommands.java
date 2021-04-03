@@ -37,8 +37,7 @@ public class GenresCommands {
 
     @ShellMethod(value = "Delete genre by id", key = "deleteGenre")
     public String deleteGenre(Long id) {
-        return service.deleteById(id) == 1
-                ? "successfully deleted"
-                : "not deleted: possible the genre with this id does not exist";
+        service.deleteById(id);
+        return "successfully deleted";
     }
 }

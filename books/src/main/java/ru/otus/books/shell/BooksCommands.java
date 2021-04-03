@@ -36,8 +36,7 @@ public class BooksCommands {
 
     @ShellMethod(value = "Delete book by id", key = "deleteBook")
     public String deleteBook(Long id) {
-        return service.deleteById(id) == 1
-                ? "successfully deleted"
-                : "not deleted: possible the book with this id does not exist";
+        service.deleteById(id);
+        return "successfully deleted";
     }
 }

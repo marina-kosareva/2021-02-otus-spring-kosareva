@@ -41,8 +41,7 @@ public class CommentsCommands {
 
     @ShellMethod(value = "Delete comment by id", key = "deleteComment")
     public String deleteComment(Long id) {
-        return service.deleteById(id) == 1
-                ? "successfully deleted"
-                : "not deleted: possible the comment with this id does not exist";
+        service.deleteById(id);
+        return "successfully deleted";
     }
 }

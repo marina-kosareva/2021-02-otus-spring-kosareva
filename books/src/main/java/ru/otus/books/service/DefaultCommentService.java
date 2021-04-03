@@ -2,8 +2,10 @@ package ru.otus.books.service;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.otus.books.exceptions.CommentRepositoryException;
 import ru.otus.books.model.Comment;
 import ru.otus.books.repository.CommentRepository;
 
@@ -19,13 +21,14 @@ public class DefaultCommentService implements CommentService {
     @Override
     @Transactional(readOnly = true)
     public Comment getById(Long id) {
-        return repository.getById(id);
+        return repository.findById(id)
+                .orElseThrow(() -> new CommentRepositoryException("error getting comment by id " + id));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Comment> getAll() {
-        return repository.getAll();
+        return repository.findAll();
     }
 
     @Override
@@ -37,23 +40,30 @@ public class DefaultCommentService implements CommentService {
     @Override
     @Transactional
     public Comment create(String text, Long bookId) {
-        return repository.create(Comment.builder()
-                .text(text)
-                .book(bookService.getById(bookId))
-                .build());
+        try {
+            return repository.saveAndFlush(Comment.builder()
+                    .text(text)
+                    .book(bookService.getById(bookId))
+                    .build());
+        } catch (DataIntegrityViolationException ex) {
+            throw new CommentRepositoryException("error during comment creating", ex);
+        }
     }
 
     @Override
     @Transactional
     public Comment update(Long id, String text) {
-        Comment existing = getById(id);
-        existing.setText(text);
-        return repository.update(existing);
+        try {
+            Comment existing = getById(id);
+            existing.setText(text);
+            return repository.saveAndFlush(existing);
+        } catch (DataIntegrityViolationException ex) {
+            throw new CommentRepositoryException("error during comment updating", ex);
+        }
     }
 
     @Override
-    @Transactional
-    public int deleteById(Long id) {
-        return repository.deleteById(id);
+    public void deleteById(Long id) {
+        repository.deleteById(id);
     }
 }

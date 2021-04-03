@@ -1,23 +1,21 @@
-package ru.otus.books.repository;
+package ru.otus.books.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;
 import ru.otus.books.exceptions.AuthorRepositoryException;
 import ru.otus.books.model.Author;
 import ru.otus.books.model.Book;
-
-import javax.persistence.PersistenceException;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @DataJpaTest
-@Import({DefaultAuthorRepository.class})
-class AuthorRepositoryTest {
+@Import({DefaultAuthorService.class})
+class AuthorServiceTest {
 
     private static final Author EXISTING_AUTHOR_1 = Author.builder()
             .id(1L)
@@ -33,75 +31,80 @@ class AuthorRepositoryTest {
     private static final Long EXISTING_BOOK_ID_FOR_AUTHOR_1 = 1L;
 
     @Autowired
-    private AuthorRepository repository;
-
+    private AuthorService service;
     @Autowired
     private TestEntityManager em;
 
     @Test
     void shouldReturnAuthorById() {
-        assertThat(repository.getById(EXISTING_AUTHOR_1.getId()))
+        assertThat(service.getById(EXISTING_AUTHOR_1.getId()))
                 .usingRecursiveComparison()
                 .isEqualTo(EXISTING_AUTHOR_1);
     }
 
     @Test
     void shouldThrowExceptionWhileGettingAuthorByNonExistingId() {
-        assertThatThrownBy(() -> repository.getById(NON_EXISTING_AUTHOR_ID))
+        assertThatThrownBy(() -> service.getById(NON_EXISTING_AUTHOR_ID))
                 .isInstanceOf(AuthorRepositoryException.class)
                 .hasMessage("error getting author by id " + NON_EXISTING_AUTHOR_ID);
     }
 
     @Test
     void shouldReturnAllAuthors() {
-        List<Author> actualAuthors = repository.getAll();
-        assertThat(actualAuthors).usingRecursiveFieldByFieldElementComparator().containsExactlyInAnyOrder(
-                EXISTING_AUTHOR_1, EXISTING_AUTHOR_2);
+        assertThat(service.getAll())
+                .usingRecursiveFieldByFieldElementComparator()
+                .containsExactlyInAnyOrder(EXISTING_AUTHOR_1, EXISTING_AUTHOR_2);
     }
 
     @Test
     void shouldCreateAuthor() {
-        Author author = author("Ivan", "Ivanov");
 
-        Author createdAuthor = repository.create(author);
+        Author createdAuthor = service.create("Ivan", "Ivanov");
 
-        assertThat(em.find(Author.class, createdAuthor.getId()))
-                .usingRecursiveComparison()
-                .isEqualTo(author);
+        Author expected = Author.builder()
+                .id(createdAuthor.getId())
+                .firstName("Ivan")
+                .lastName("Ivanov")
+                .build();
+
+        assertThat(em.find(Author.class, createdAuthor.getId())).isEqualTo(expected);
     }
 
     @Test
     void shouldThrowExceptionWhileCreatingDuplicateAuthor() {
-        Author author = author(EXISTING_AUTHOR_1.getFirstName(), EXISTING_AUTHOR_1.getLastName());
-
-        assertThatThrownBy(() -> repository.create(author))
+        assertThatThrownBy(() -> service.create(EXISTING_AUTHOR_1.getFirstName(), EXISTING_AUTHOR_1.getLastName()))
                 .isInstanceOf(AuthorRepositoryException.class)
-                .hasMessage("error during author creating Author(id=null, firstName=first_name_1, lastName=last_name_1)")
-                .hasCauseInstanceOf(PersistenceException.class);
+                .hasMessage("error during author creating")
+                .hasCauseInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test
     void shouldUpdateAuthor() {
-        Author existing = em.find(Author.class, EXISTING_AUTHOR_1.getId());
-        existing.setLastName("Ivanov");
-        existing.setFirstName("Ivan");
+        service.update(EXISTING_AUTHOR_1.getId(), "Ivan", "Ivanov");
 
-        Author expected = author(EXISTING_AUTHOR_1.getId(), "Ivan", "Ivanov");
-        repository.update(existing);
+        Author expected = Author.builder()
+                .id(EXISTING_AUTHOR_1.getId())
+                .firstName("Ivan")
+                .lastName("Ivanov")
+                .build();
 
-        assertThat(em.find(Author.class, EXISTING_AUTHOR_1.getId()))
-                .usingRecursiveComparison()
-                .isEqualTo(expected);
+        assertThat(em.find(Author.class, EXISTING_AUTHOR_1.getId())).isEqualTo(expected);
+    }
+
+    @Test
+    void shouldNotUpdateAuthor() {
+        assertThatThrownBy(() -> service.update(EXISTING_AUTHOR_1.getId(), EXISTING_AUTHOR_2.getFirstName(), EXISTING_AUTHOR_2.getLastName()))
+                .isInstanceOf(AuthorRepositoryException.class)
+                .hasMessage("error during author updating")
+                .hasCauseInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test
     void shouldDeleteAuthorById() {
-        Author existing = em.find(Author.class, EXISTING_AUTHOR_1.getId());
-        assertThat(existing).isNotNull();
+        assertThat(em.find(Author.class, EXISTING_AUTHOR_1.getId())).isNotNull();
 
-        assertThat(repository.deleteById(EXISTING_AUTHOR_1.getId())).isEqualTo(1);
+        service.deleteById(EXISTING_AUTHOR_1.getId());
 
-        em.detach(existing);
         assertThat(em.find(Author.class, EXISTING_AUTHOR_1.getId())).isNull();
     }
 
@@ -109,23 +112,9 @@ class AuthorRepositoryTest {
     void shouldDeleteBookIfAuthorDeleted() {
         Book existing = em.find(Book.class, EXISTING_BOOK_ID_FOR_AUTHOR_1);
         assertThat(existing).isNotNull();
-
-        repository.deleteById(EXISTING_AUTHOR_1.getId());
-
+        service.deleteById(EXISTING_AUTHOR_1.getId());
         em.detach(existing);
+        em.flush();
         assertThat(em.find(Book.class, EXISTING_BOOK_ID_FOR_AUTHOR_1)).isNull();
-
-    }
-
-    private Author author(String firstName, String lastName) {
-        return author(null, firstName, lastName);
-    }
-
-    private Author author(Long id, String firstName, String lastName) {
-        return Author.builder()
-                .id(id)
-                .firstName(firstName)
-                .lastName(lastName)
-                .build();
     }
 }

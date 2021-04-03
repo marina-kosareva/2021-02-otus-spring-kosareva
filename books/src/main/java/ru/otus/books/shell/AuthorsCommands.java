@@ -37,8 +37,7 @@ public class AuthorsCommands {
 
     @ShellMethod(value = "Delete author by id", key = "deleteAuthor")
     public String deleteAuthor(Long id) {
-        return service.deleteById(id) == 1
-                ? "successfully deleted"
-                : "not deleted: possible the author with this id does not exist";
+        service.deleteById(id);
+        return "successfully deleted";
     }
 }
