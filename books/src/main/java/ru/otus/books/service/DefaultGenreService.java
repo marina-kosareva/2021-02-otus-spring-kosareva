@@ -2,8 +2,10 @@ package ru.otus.books.service;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.otus.books.exceptions.GenreRepositoryException;
 import ru.otus.books.model.Genre;
 import ru.otus.books.repository.GenreRepository;
 
@@ -18,34 +20,41 @@ public class DefaultGenreService implements GenreService {
     @Override
     @Transactional(readOnly = true)
     public Genre getById(Long id) {
-        return repository.getById(id);
+        return repository.findById(id)
+                .orElseThrow(() -> new GenreRepositoryException("error getting genre by id " + id));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Genre> getAll() {
-        return repository.getAll();
+        return repository.findAll();
     }
 
     @Override
-    @Transactional
     public Genre create(String title) {
-        return repository.create(Genre.builder()
-                .title(title)
-                .build());
+        try {
+            return repository.save(Genre.builder()
+                    .title(title)
+                    .build());
+        } catch (DataIntegrityViolationException ex) {
+            throw new GenreRepositoryException("error during genre creating", ex);
+        }
     }
 
     @Override
     @Transactional
     public Genre update(Long id, String title) {
-        Genre existing = getById(id);
-        existing.setTitle(title);
-        return repository.update(existing);
+        try {
+            Genre existing = getById(id);
+            existing.setTitle(title);
+            return repository.saveAndFlush(existing);
+        } catch (DataIntegrityViolationException ex) {
+            throw new GenreRepositoryException("error during genre updating", ex);
+        }
     }
 
     @Override
-    @Transactional
-    public int deleteById(Long id) {
-        return repository.deleteById(id);
+    public void deleteById(Long id) {
+        repository.deleteById(id);
     }
 }

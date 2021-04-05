@@ -1,4 +1,4 @@
-package ru.otus.books.repository;
+package ru.otus.books.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,14 +11,13 @@ import ru.otus.books.model.Book;
 import ru.otus.books.model.Comment;
 import ru.otus.books.model.Genre;
 
-import javax.persistence.NoResultException;
-
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @DataJpaTest
-@Import({DefaultCommentRepository.class})
-class CommentRepositoryTest {
+@Import({DefaultCommentService.class, DefaultBookService.class,
+        DefaultAuthorService.class, DefaultGenreService.class})
+class CommentServiceTest {
 
     private static final Long NON_EXISTING_COMMENT_ID = 100L;
 
@@ -71,71 +70,65 @@ class CommentRepositoryTest {
             .build();
 
     @Autowired
-    private CommentRepository repository;
-
+    private CommentService service;
     @Autowired
     private TestEntityManager em;
 
     @Test
     void shouldReturnCommentById() {
-        assertThat(repository.getById(EXISTING_COMMENT_1.getId()))
+        assertThat(service.getById(EXISTING_COMMENT_1.getId()))
                 .isEqualTo(EXISTING_COMMENT_1);
     }
 
     @Test
     void shouldThrowExceptionWhileGettingCommentByNonExistingId() {
-        assertThatThrownBy(() -> repository.getById(NON_EXISTING_COMMENT_ID))
+        assertThatThrownBy(() -> service.getById(NON_EXISTING_COMMENT_ID))
                 .isInstanceOf(CommentRepositoryException.class)
-                .hasMessage("error getting comment by id " + NON_EXISTING_COMMENT_ID)
-                .hasCauseInstanceOf(NoResultException.class);
+                .hasMessage("error getting comment by id " + NON_EXISTING_COMMENT_ID);
     }
 
     @Test
     void shouldReturnAllComments() {
-        assertThat(repository.getAll())
+        assertThat(service.getAll())
                 .usingRecursiveFieldByFieldElementComparator()
                 .containsExactlyInAnyOrder(EXISTING_COMMENT_1, EXISTING_COMMENT_2, EXISTING_COMMENT_3);
     }
 
     @Test
     void shouldReturnAllCommentsByBookId() {
-        assertThat(repository.getByBookId(EXISTING_BOOK_1.getId()))
+        assertThat(service.getByBookId(EXISTING_BOOK_1.getId()))
                 .usingRecursiveFieldByFieldElementComparator()
                 .containsExactlyInAnyOrder(EXISTING_COMMENT_1, EXISTING_COMMENT_2);
     }
 
     @Test
     void shouldCreateComment() {
-        Comment comment = Comment.builder()
+        Comment createdComment = service.create("new comment", EXISTING_BOOK_1.getId());
+
+        Comment expected = Comment.builder()
+                .id(createdComment.getId())
                 .text("new comment")
                 .book(EXISTING_BOOK_1)
                 .build();
-        Comment createdComment = repository.create(comment);
-
-        assertThat(em.find(Comment.class, createdComment.getId()))
-                .isEqualTo(comment);
+        assertThat(em.find(Comment.class, createdComment.getId())).isEqualTo(expected);
     }
 
     @Test
     void shouldUpdateComment() {
-        Comment existing = em.find(Comment.class, EXISTING_COMMENT_1.getId());
-        existing.setText("new comment");
         Comment expected = Comment.builder()
                 .id(EXISTING_COMMENT_1.getId())
                 .text("new comment")
                 .book(EXISTING_BOOK_1)
                 .build();
-        repository.update(existing);
+        service.update(EXISTING_COMMENT_1.getId(), "new comment");
         assertThat(em.find(Comment.class, EXISTING_COMMENT_1.getId())).isEqualTo(expected);
     }
 
     @Test
     void shouldDeleteCommentById() {
-        Comment existing = em.find(Comment.class, EXISTING_COMMENT_2.getId());
-        assertThat(existing).isNotNull();
+        assertThat(em.find(Comment.class, EXISTING_COMMENT_2.getId())).isNotNull();
 
-        repository.deleteById(EXISTING_COMMENT_2.getId());
-        em.detach(existing);
+        service.deleteById(EXISTING_COMMENT_2.getId());
 
         assertThat(em.find(Comment.class, EXISTING_COMMENT_2.getId())).isNull();
     }

@@ -14,5 +14,5 @@ public interface AuthorService {
 
     Author update(Long id, String firstName, String lastName);
 
-    int deleteById(Long id);
+    void deleteById(Long id);
 }
