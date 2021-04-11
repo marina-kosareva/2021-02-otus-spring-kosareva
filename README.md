@@ -14,3 +14,5 @@ hw5 - books (jdbc)
 hw6 - books (jpql)
 
 hw7 - books (data-jpa)
+
+hw8 - library (mongo)
