@@ -15,16 +15,16 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 @Import({CascadeMongoEventListener.class})
 class AuthorRepositoryTest {
 
-    private static Author AUTHOR = Author.builder()
+    private static final Author AUTHOR = Author.builder()
             .id("author1Id")
             .firstName("firstName1")
             .lastName("lastName1")
             .build();
-    private static Genre GENRE = Genre.builder()
+    private static final Genre GENRE = Genre.builder()
             .id("genre1Id")
             .title("genre1")
             .build();
-    private static Book BOOK = Book.builder()
+    private static final Book BOOK = Book.builder()
             .id("book1Id")
             .author(AUTHOR)
             .genre(GENRE)
