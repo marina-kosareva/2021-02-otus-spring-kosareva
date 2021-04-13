@@ -4,7 +4,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.context.annotation.Import;
-import ru.otus.library.listener.CascadeMongoEventListener;
+import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.test.annotation.DirtiesContext;
+import ru.otus.library.listener.AuthorMongoEventListener;
 import ru.otus.library.model.Author;
 import ru.otus.library.model.Book;
 import ru.otus.library.model.Genre;
@@ -12,7 +16,8 @@ import ru.otus.library.model.Genre;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @DataMongoTest
-@Import({CascadeMongoEventListener.class})
+@Import({AuthorMongoEventListener.class})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class AuthorRepositoryTest {
 
     private static final Author AUTHOR = Author.builder()
@@ -35,27 +40,29 @@ class AuthorRepositoryTest {
     private AuthorRepository repository;
 
     @Autowired
-    private BookRepository bookRepository;
+    private MongoOperations mongoOperations;
 
     @Test
     void shouldDeleteBookIfAuthorIsDeleted() {
-        assertThat(repository.findById(AUTHOR.getId())).isNotEmpty();
-        assertThat(bookRepository.findById("book1Id")).isNotEmpty();
+        assertThat(mongoOperations.findOne(Query.query(Criteria.where("_id").is(AUTHOR.getId())), Author.class))
+                .isNotNull();
+        assertThat(mongoOperations.findOne(Query.query(Criteria.where("_id").is("book1Id")), Book.class))
+                .isNotNull();
 
         repository.deleteById(AUTHOR.getId());
 
-        assertThat(repository.findById(AUTHOR.getId())).isEmpty();
-        assertThat(bookRepository.findById(BOOK.getId())).isEmpty();
-
-        // return to initial state
-        repository.save(AUTHOR);
-        bookRepository.save(BOOK);
+        assertThat(mongoOperations.findOne(Query.query(Criteria.where("_id").is(AUTHOR.getId())), Author.class))
+                .isNull();
+        assertThat(mongoOperations.findOne(Query.query(Criteria.where("_id").is("book1Id")), Book.class))
+                .isNull();
     }
 
     @Test
     void shouldUpdateBookIfAuthorIsUpdated() {
-        assertThat(repository.findById(AUTHOR.getId())).isNotEmpty().hasValue(AUTHOR);
-        assertThat(bookRepository.findById(BOOK.getId())).isNotEmpty().hasValue(BOOK);
+        assertThat(mongoOperations.findOne(Query.query(Criteria.where("_id").is(AUTHOR.getId())), Author.class))
+                .isEqualTo(AUTHOR);
+        assertThat(mongoOperations.findOne(Query.query(Criteria.where("_id").is(BOOK.getId())), Book.class))
+                .isEqualTo(BOOK);
 
         Author authorUpdated = Author.builder()
                 .id(AUTHOR.getId())
@@ -70,12 +77,9 @@ class AuthorRepositoryTest {
                 .build();
         repository.save(authorUpdated);
 
-        assertThat(repository.findById(AUTHOR.getId())).hasValue(authorUpdated);
-        assertThat(bookRepository.findById(BOOK.getId())).hasValue(bookUpdated);
-
-        // return to initial state
-        repository.save(AUTHOR);
-        assertThat(bookRepository.findById(BOOK.getId())).hasValue(BOOK);
+        assertThat(mongoOperations.findOne(Query.query(Criteria.where("_id").is(AUTHOR.getId())), Author.class))
+                .isEqualTo(authorUpdated);
+        assertThat(mongoOperations.findOne(Query.query(Criteria.where("_id").is(BOOK.getId())), Book.class))
+                .isEqualTo(bookUpdated);
     }
-
 }

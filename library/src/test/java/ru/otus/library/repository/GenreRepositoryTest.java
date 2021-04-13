@@ -4,7 +4,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.context.annotation.Import;
-import ru.otus.library.listener.CascadeMongoEventListener;
+import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.test.annotation.DirtiesContext;
+import ru.otus.library.listener.GenreMongoEventListener;
 import ru.otus.library.model.Author;
 import ru.otus.library.model.Book;
 import ru.otus.library.model.Genre;
@@ -12,7 +16,8 @@ import ru.otus.library.model.Genre;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @DataMongoTest
-@Import({CascadeMongoEventListener.class})
+@Import({GenreMongoEventListener.class})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class GenreRepositoryTest {
 
     private static Author AUTHOR = Author.builder()
@@ -35,27 +40,29 @@ class GenreRepositoryTest {
     private GenreRepository repository;
 
     @Autowired
-    private BookRepository bookRepository;
+    private MongoOperations mongoOperations;
 
     @Test
     void shouldDeleteBookIfGenreIsDeleted() {
-        assertThat(repository.findById(GENRE.getId())).isNotEmpty();
-        assertThat(bookRepository.findById("book1Id")).isNotEmpty();
+        assertThat(mongoOperations.findOne(Query.query(Criteria.where("_id").is(GENRE.getId())), Genre.class))
+                .isNotNull();
+        assertThat(mongoOperations.findOne(Query.query(Criteria.where("_id").is("book1Id")), Book.class))
+                .isNotNull();
 
         repository.deleteById(GENRE.getId());
 
-        assertThat(repository.findById(GENRE.getId())).isEmpty();
-        assertThat(bookRepository.findById(BOOK.getId())).isEmpty();
-
-        // return to initial state
-        repository.save(GENRE);
-        bookRepository.save(BOOK);
+        assertThat(mongoOperations.findOne(Query.query(Criteria.where("_id").is(GENRE.getId())), Genre.class))
+                .isNull();
+        assertThat(mongoOperations.findOne(Query.query(Criteria.where("_id").is("book1Id")), Book.class))
+                .isNull();
     }
 
     @Test
     void shouldUpdateBookIfGenreIsUpdated() {
-        assertThat(repository.findById(GENRE.getId())).isNotEmpty().hasValue(GENRE);
-        assertThat(bookRepository.findById(BOOK.getId())).isNotEmpty().hasValue(BOOK);
+        assertThat(mongoOperations.findOne(Query.query(Criteria.where("_id").is(GENRE.getId())), Genre.class))
+                .isEqualTo(GENRE);
+        assertThat(mongoOperations.findOne(Query.query(Criteria.where("_id").is(BOOK.getId())), Book.class))
+                .isEqualTo(BOOK);
 
         Genre genreUpdated = Genre.builder()
                 .id(GENRE.getId())
@@ -69,12 +76,9 @@ class GenreRepositoryTest {
                 .build();
         repository.save(genreUpdated);
 
-        assertThat(repository.findById(GENRE.getId())).hasValue(genreUpdated);
-        assertThat(bookRepository.findById(BOOK.getId())).hasValue(bookUpdated);
-
-        // return to initial state
-        repository.save(GENRE);
-        assertThat(bookRepository.findById(BOOK.getId())).hasValue(BOOK);
+        assertThat(mongoOperations.findOne(Query.query(Criteria.where("_id").is(GENRE.getId())), Genre.class))
+                .isEqualTo(genreUpdated);
+        assertThat(mongoOperations.findOne(Query.query(Criteria.where("_id").is(BOOK.getId())), Book.class))
+                .isEqualTo(bookUpdated);
     }
-
 }

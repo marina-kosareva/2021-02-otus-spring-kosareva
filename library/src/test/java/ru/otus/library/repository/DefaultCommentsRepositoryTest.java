@@ -4,18 +4,25 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.test.annotation.DirtiesContext;
+import ru.otus.library.model.Book;
 import ru.otus.library.model.Comment;
-
-import java.util.List;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @DataMongoTest
 @Import({DefaultCommentsRepository.class})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class DefaultCommentsRepositoryTest {
 
     @Autowired
     private CommentsRepository repository;
+
+    @Autowired
+    private MongoOperations mongoOperations;
 
     @Test
     void findCommentsByBookId() {
@@ -27,51 +34,57 @@ class DefaultCommentsRepositoryTest {
 
     @Test
     void createCommentForBook() {
-        assertThat(repository.findCommentsByBookId("book1Id")).isEmpty();
+        Book book = mongoOperations.findOne(Query.query(Criteria.where("_id").is("book1Id")), Book.class);
+        assertThat(book).isNotNull();
+        assertThat(book.getComments()).isNull();
 
         repository.createCommentForBook(new Comment("comment for book1"), "book1Id");
 
-        List<Comment> expected = repository.findCommentsByBookId("book1Id");
-        assertThat(expected)
+        Book bookUpdated = mongoOperations.findOne(Query.query(Criteria.where("_id").is("book1Id")), Book.class);
+        assertThat(bookUpdated).isNotNull();
+        assertThat(bookUpdated.getComments())
                 .hasSize(1)
                 .extracting("text")
                 .containsExactly("comment for book1");
-        // return to initial state
-        repository.deleteCommentByIdForBook(expected.get(0).getUuid(), "book1Id");
     }
 
     @Test
     void addCommentForBook() {
-        assertThat(repository.findCommentsByBookId("book2Id")).hasSize(2);
+        Book book = mongoOperations.findOne(Query.query(Criteria.where("_id").is("book2Id")), Book.class);
+        assertThat(book).isNotNull();
+        assertThat(book.getComments()).hasSize(2);
 
         repository.createCommentForBook(new Comment("new comment for book2"), "book2Id");
 
-        List<Comment> expected = repository.findCommentsByBookId("book2Id");
-        assertThat(expected)
+        Book bookUpdated = mongoOperations.findOne(Query.query(Criteria.where("_id").is("book2Id")), Book.class);
+        assertThat(bookUpdated).isNotNull();
+        assertThat(bookUpdated.getComments())
                 .hasSize(3)
                 .extracting("text")
                 .containsExactlyInAnyOrder("comment1", "comment2", "new comment for book2");
-
-        String addedCommentId = expected.stream()
-                .filter(comment -> "new comment for book2".equals(comment.getText()))
-                .map(Comment::getUuid)
-                .findFirst()
-                .orElse(null);
-        assertThat(addedCommentId).isNotEmpty();
-
-        // return to initial state
-        repository.deleteCommentByIdForBook(addedCommentId, "book1Id");
     }
 
     @Test
     void deleteCommentByIdForBook() {
-        repository.createCommentForBook(new Comment("comment for book3"), "book3Id");
-        assertThat(repository.findCommentsByBookId("book3Id")).hasSize(1);
-        Comment comment = repository.findCommentsByBookId("book3Id").get(0);
+        Book book = mongoOperations.findOne(Query.query(Criteria.where("_id").is("book2Id")), Book.class);
+        assertThat(book).isNotNull();
+        assertThat(book.getComments()).hasSize(2);
 
-        long result = repository.deleteCommentByIdForBook(comment.getUuid(), "book3Id");
+        String commentUuid = book.getComments().stream()
+                .filter(comment -> "comment1".equals(comment.getText()))
+                .map(Comment::getUuid)
+                .findFirst()
+                .orElse(null);
+        assertThat(commentUuid).isNotNull();
+
+        long result = repository.deleteCommentByIdForBook(commentUuid, "book2Id");
 
         assertThat(result).isOne();
-        assertThat(repository.findCommentsByBookId("book3Id")).isEmpty();
+        Book bookUpdated = mongoOperations.findOne(Query.query(Criteria.where("_id").is("book2Id")), Book.class);
+        assertThat(bookUpdated).isNotNull();
+        assertThat(bookUpdated.getComments())
+                .hasSize(1)
+                .extracting("text")
+                .containsExactlyInAnyOrder("comment2");
     }
 }
