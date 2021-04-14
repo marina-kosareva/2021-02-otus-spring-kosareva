@@ -13,5 +13,6 @@
     <modules>
         <module>questionnaire</module>
         <module>books</module>
+        <module>library</module>
     </modules>
 </project>
