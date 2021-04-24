@@ -37,7 +37,7 @@ public class BookController {
     public String add(@Valid @ModelAttribute("createBookRequest") CreateBookRequest createBookRequest,
                       BindingResult result, Model model) {
         if (result.hasErrors()) {
-            return getAddView(model);
+            return "redirect:/add";
         }
         bookService.create(createBookRequest.getTitle(), createBookRequest.getGenreId(), createBookRequest.getAuthorId());
         model.addAttribute("genres", genreService.getAll());
@@ -64,9 +64,9 @@ public class BookController {
     @PostMapping("/update/{id}")
     public String update(@PathVariable("id") String id,
                          @Valid @ModelAttribute("updateBookRequest") UpdateBookRequest request,
-                         BindingResult result, Model model) {
+                         BindingResult result) {
         if (result.hasErrors()) {
-            return getUpdateView(id, model);
+            return "redirect:/update/" + id;
         }
         bookService.update(id, request.getTitle());
         return REDIRECT_TO_INDEX;
