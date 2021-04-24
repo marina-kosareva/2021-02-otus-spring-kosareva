@@ -28,32 +28,42 @@ public class DatabaseChangelog {
     public void insertData(AuthorRepository authorRepository,
                            GenreRepository genreRepository,
                            BookRepository bookRepository) {
-        Author authorGuzel = authorRepository.save(Author.builder()
-                .firstName("Guzel")
-                .lastName("Yahina")
-                .build());
-        Author authorRobert = authorRepository.save(Author.builder()
-                .firstName("Robert")
-                .lastName("Martin")
-                .build());
-        Genre novel = genreRepository.save(Genre.builder()
-                .title("novel")
-                .build());
-        Genre professional = genreRepository.save(Genre.builder()
-                .title("professional")
-                .build());
-        Book book1 = Book.builder()
-                .author(authorGuzel)
-                .genre(novel)
-                .title("Zuleikha opens her eyes")
-                .comments(new HashSet<>())
-                .build();
-        bookRepository.saveAll(asList(book1,
+        bookRepository.saveAll(asList(Book.builder()
+                        .title("Zuleikha opens her eyes")
+                        .author(authorRepository.save(author("Guzel", "Yahina")))
+                        .genre(genreRepository.save(genre("Historical fiction")))
+                        .comments(new HashSet<>())
+                        .build(),
                 Book.builder()
-                        .author(authorRobert)
-                        .genre(professional)
                         .title("Clean code")
+                        .author(authorRepository.save(author("Robert", "Martin")))
+                        .genre(genreRepository.save(genre("Academic")))
                         .comments(Set.of(new Comment("good"), new Comment("very well")))
                         .build()));
+    }
+
+    @ChangeSet(order = "003", id = "insertGenres", author = "kosmar")
+    public void insertGenres(GenreRepository genreRepository) {
+        genreRepository.save(genre("Action fiction"));
+        genreRepository.save(genre("Adventure fiction"));
+        genreRepository.save(genre("Crime fiction"));
+        genreRepository.save(genre("Fantasy"));
+        genreRepository.save(genre("Horror"));
+        genreRepository.save(genre("Romantic fiction"));
+        genreRepository.save(genre("Science fiction"));
+        genreRepository.save(genre("Biography"));
+    }
+
+    private Genre genre(String title) {
+        return Genre.builder()
+                .title(title)
+                .build();
+    }
+
+    private Author author(String firstName, String lastName) {
+        return Author.builder()
+                .firstName(firstName)
+                .lastName(lastName)
+                .build();
     }
 }
