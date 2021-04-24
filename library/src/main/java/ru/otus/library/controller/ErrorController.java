@@ -1,31 +1,35 @@
 package ru.otus.library.controller;
 
-import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.otus.library.exceptions.AuthorRepositoryException;
 import ru.otus.library.exceptions.BookRepositoryException;
 import ru.otus.library.exceptions.GenreRepositoryException;
 
+import java.time.LocalDateTime;
+
 @ControllerAdvice
 public class ErrorController {
 
     @ExceptionHandler(BookRepositoryException.class)
-    public ResponseEntity<String> handleBookRepositoryException(BookRepositoryException ex) {
-        return errorResponse("BookException: ", ex);
+    public String handleBookRepositoryException(BookRepositoryException ex, Model model) {
+        return errorResponse(model, ex);
     }
 
     @ExceptionHandler(AuthorRepositoryException.class)
-    public ResponseEntity<String> handleAuthorRepositoryException(AuthorRepositoryException ex) {
-        return errorResponse("AuthorException: ", ex);
+    public String handleAuthorRepositoryException(AuthorRepositoryException ex, Model model) {
+        return errorResponse(model, ex);
     }
 
     @ExceptionHandler(GenreRepositoryException.class)
-    public ResponseEntity<String> handleGenreRepositoryException(GenreRepositoryException ex) {
-        return errorResponse("GenreException: ", ex);
+    public String handleGenreRepositoryException(GenreRepositoryException ex, Model model) {
+        return errorResponse(model, ex);
     }
 
-    private ResponseEntity<String> errorResponse(String message, Throwable ex) {
-        return ResponseEntity.badRequest().body(message + ex.getMessage());
+    private String errorResponse(Model model, Throwable ex) {
+        model.addAttribute("timestamp", LocalDateTime.now());
+        model.addAttribute("exception", ex);
+        return "error";
     }
 }
