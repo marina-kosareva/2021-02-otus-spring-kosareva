@@ -35,13 +35,11 @@ public class BookController {
 
     @PostMapping("/add")
     public String add(@Valid @ModelAttribute("createBookRequest") CreateBookRequest createBookRequest,
-                      BindingResult result, Model model) {
+                      BindingResult result) {
         if (result.hasErrors()) {
             return "redirect:/add";
         }
         bookService.create(createBookRequest.getTitle(), createBookRequest.getGenreId(), createBookRequest.getAuthorId());
-        model.addAttribute("genres", genreService.getAll());
-        model.addAttribute("authors", authorService.getAll());
         return REDIRECT_TO_INDEX;
     }
 
