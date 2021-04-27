@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <style type="text/css">
+        body {
+            padding: 10pt;
+        }
+
+        button {
+            border: 2pt solid olive
+        }
+
+        table {
+            border: none
+        }
+
+        td, th {
+            border-bottom: 2pt solid olive;
+            padding: 5pt
+        }
+    </style>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css"
+          integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz"
+          crossorigin="anonymous">
+    <title>Books</title>
+</head>
+<body>
+
+<form th:action="@{/add}" th:method="post" action="add-book.html">
+    <button type="submit">Add new book</button>
+</form>
+
+<table>
+    <thead>
+    <tr>
+        <th>Title</th>
+        <th>Genre</th>
+        <th>Author</th>
+        <th></th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="book : ${books}">
+        <td th:text="${book.title}">title</td>
+        <td th:text="${book.genreTitle}">genre</td>
+        <td th:text="${book.authorFullName}">author</td>
+        <td>
+            <form th:action="@{/update/{id}(id=${book.id})}" th:method="post" action="update-book.html">
+                <button type="submit">
+                    <i class="fas fa-edit"></i>
+                </button>
+            </form>
+        </td>
+        <td>
+            <form th:action="@{/delete/{id}(id=${book.id})}" th:method="post">
+                <button type="submit">
+                    <i class="far fa-trash-alt"></i>
+                </button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

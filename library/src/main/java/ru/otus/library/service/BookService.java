@@ -1,18 +1,19 @@
 package ru.otus.library.service;
 
+import ru.otus.library.dto.BookDto;
 import ru.otus.library.model.Book;
 
 import java.util.List;
 
 public interface BookService {
 
-    Book getById(String id);
+    BookDto getBookDtoById(String id);
 
-    List<Book> getAll();
+    List<BookDto> getAll();
 
-    Book create(String title, String genreId, String authorId);
+    BookDto create(String title, String genreId, String authorId);
 
-    Book update(String id, String title);
+    BookDto update(String id, String title);
 
     void deleteById(String id);
 }
