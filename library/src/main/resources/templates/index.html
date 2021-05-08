@@ -53,6 +53,7 @@
     <thead>
     <tr>
         <th>Id</th>
+        <th>Version</th>
         <th>Title</th>
         <th>Genre</th>
         <th>Author</th>
@@ -75,10 +76,11 @@
                 $('#books tbody').append(`
                     <tr>
                         <td>${book.id}</td>
-                        <td><input id = 'upd_title_${book.id}' name="edit_email" type="text" value='${book.title}'></td>
+                        <td>${book.version}</td>
+                        <td><input id = 'upd_title_${book.id}' type="text" value='${book.title}'></td>
                         <td>${book.genreTitle}</td>
                         <td>${book.authorFullName}</td>
-                        <td><button onclick="updateBook('${book.id}')"><i class="fas fa-edit"></i></button></td>
+                        <td><button onclick="updateBook('${book.id}', ${book.version})"><i class="fas fa-edit"></i></button></td>
                         <td><button onclick="deleteBook('${book.id}')"><i class="far fa-trash-alt"></i></button></td>
                     </tr>
                 `)
@@ -106,16 +108,17 @@
         })
     });
 
-    function updateBook(id) {
+    function updateBook(id, version) {
         let updateBookRequest = {};
         updateBookRequest.title = document.getElementById('upd_title_' + id).value;
+        updateBookRequest.version = version;
+
         $.ajax({
             url: "/book/" + id,
             method: 'PUT',
             data: JSON.stringify(updateBookRequest),
             contentType: 'application/json; charset=utf-8',
             success: function () {
-                alert("updated");
                 getBooks();
             },
             error: function (error) {

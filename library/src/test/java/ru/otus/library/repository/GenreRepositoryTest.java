@@ -30,6 +30,7 @@ class GenreRepositoryTest {
             .title("genre1")
             .build();
     private static Book BOOK = Book.builder()
+            .version(0L)
             .id("book1Id")
             .author(AUTHOR)
             .genre(GENRE)
@@ -69,6 +70,7 @@ class GenreRepositoryTest {
                 .title("titleUpdated")
                 .build();
         Book bookUpdated = Book.builder()
+                .version(BOOK.getVersion() + 1)
                 .id(BOOK.getId())
                 .author(BOOK.getAuthor())
                 .genre(genreUpdated)

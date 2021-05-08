@@ -1,5 +1,6 @@
 package ru.otus.library.rest;
 
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -35,6 +36,11 @@ public class ErrorController {
                         .stream()
                         .map(error -> error.getField() + "-" + error.getDefaultMessage())
                         .collect(Collectors.joining()));
+    }
+
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<String> handleOptimisticLockingException(OptimisticLockingFailureException ex) {
+        return errorResponse("Data out of sync: ", ex);
     }
 
     private ResponseEntity<String> errorResponse(String message, Throwable ex) {

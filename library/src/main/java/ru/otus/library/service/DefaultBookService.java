@@ -49,8 +49,9 @@ public class DefaultBookService implements BookService {
 
     @Override
     @Transactional
-    public BookDto update(String id, String title) {
+    public BookDto update(String id, String title, Long version) {
         Book existing = getById(id);
+        existing.setVersion(version);
         existing.setTitle(title);
         return mapper.bookToBookDto(repository.save(existing));
     }
