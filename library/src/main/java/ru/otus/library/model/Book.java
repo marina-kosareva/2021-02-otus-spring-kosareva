@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Set;
@@ -18,6 +19,8 @@ public class Book {
 
     @Id
     private String id;
+    @Version
+    private Long version;
     private String title;
     private Genre genre;
     private Author author;

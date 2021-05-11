@@ -18,3 +18,6 @@ hw7 - books (data-jpa)
 hw8 - library (mongo)
 
 hw9 - library (View - Thymeleaf, classic Controllers)
+
+hw10 - library (ajax, rest controllers)
+

@@ -2,9 +2,13 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css"
+          integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz"
+          crossorigin="anonymous">
+    <title>Books</title>
     <style type="text/css">
-        body {
-            padding: 10pt;
+        .row {
+            margin: 10pt;
         }
 
         button {
@@ -20,20 +24,36 @@
             padding: 5pt
         }
     </style>
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css"
-          integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz"
-          crossorigin="anonymous">
-    <title>Books</title>
+    <script src="webjars/jquery/3.3.1/jquery.min.js"></script>
 </head>
 <body>
-
-<form th:action="@{/add}" th:method="post" action="add-book.html">
-    <button type="submit">Add new book</button>
-</form>
-
-<table>
+<div class="row">
+    <label for="addTitle">Title: </label>
+    <input type="text" id="addTitle">
+</div>
+<div class="row">
+    <label for="genre">Genre: </label>
+    <select id="genre">
+        <option th:each="genre: ${genres}"
+                th:value="${genre.id}"
+                th:text="${genre.title}"/>
+    </select>
+</div>
+<div class="row">
+    <label for="author">Author: </label>
+    <select id="author">
+        <option th:each="author: ${authors}" th:value="${author.id}"
+                th:text="${author.firstName + ' ' + author.lastName}"/>
+    </select>
+</div>
+<div class="row">
+    <button type="submit" id="btnAddBook"> Add new book</button>
+</div>
+<table id="books">
     <thead>
     <tr>
+        <th>Id</th>
+        <th>Version</th>
         <th>Title</th>
         <th>Genre</th>
         <th>Author</th>
@@ -42,26 +62,89 @@
     </tr>
     </thead>
     <tbody>
-    <tr th:each="book : ${books}">
-        <td th:text="${book.title}">title</td>
-        <td th:text="${book.genreTitle}">genre</td>
-        <td th:text="${book.authorFullName}">author</td>
-        <td>
-            <form th:action="@{/update/{id}(id=${book.id})}" th:method="post" action="update-book.html">
-                <button type="submit">
-                    <i class="fas fa-edit"></i>
-                </button>
-            </form>
-        </td>
-        <td>
-            <form th:action="@{/delete/{id}(id=${book.id})}" th:method="post">
-                <button type="submit">
-                    <i class="far fa-trash-alt"></i>
-                </button>
-            </form>
-        </td>
-    </tr>
     </tbody>
 </table>
+<script>
+    $(document).ready(function () {
+        getBooks();
+    });
+
+    function getBooks() {
+        $('#books tbody').empty();
+        $.get('/book').done(function (books) {
+            books.forEach(function (book) {
+                $('#books tbody').append(`
+                    <tr>
+                        <td>${book.id}</td>
+                        <td>${book.version}</td>
+                        <td><input id = 'upd_title_${book.id}' type="text" value='${book.title}'></td>
+                        <td>${book.genreTitle}</td>
+                        <td>${book.authorFullName}</td>
+                        <td><button onclick="updateBook('${book.id}', ${book.version})"><i class="fas fa-edit"></i></button></td>
+                        <td><button onclick="deleteBook('${book.id}')"><i class="far fa-trash-alt"></i></button></td>
+                    </tr>
+                `)
+            });
+        })
+    }
+
+    $('#btnAddBook').click(function () {
+        let book = {};
+        book.title = $('#addTitle').val();
+        book.genreId = $('#genre').val();
+        book.authorId = $('#author').val();
+        $.ajax({
+            url: "/book",
+            method: 'POST',
+            data: JSON.stringify(book),
+            contentType: 'application/json; charset=utf-8',
+            success: function () {
+                getBooks();
+                clear();
+            },
+            error: function (error) {
+                alert(error.responseText);
+            }
+        })
+    });
+
+    function updateBook(id, version) {
+        let updateBookRequest = {};
+        updateBookRequest.title = document.getElementById('upd_title_' + id).value;
+        updateBookRequest.version = version;
+
+        $.ajax({
+            url: "/book/" + id,
+            method: 'PUT',
+            data: JSON.stringify(updateBookRequest),
+            contentType: 'application/json; charset=utf-8',
+            success: function () {
+                getBooks();
+            },
+            error: function (error) {
+                alert(error.responseText);
+                getBooks();
+            }
+        })
+    }
+
+    function deleteBook(id) {
+        $.ajax({
+            url: '/book/' + id,
+            method: 'DELETE',
+            success: function () {
+                getBooks();
+            },
+            error: function (error) {
+                alert(error.responseText);
+                getBooks();
+            }
+        })
+    }
+
+    function clear() {
+        $('#addTitle').val('');
+    }
+</script>
 </body>
 </html>

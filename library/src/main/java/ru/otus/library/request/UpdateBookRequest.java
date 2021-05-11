@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Data
 @NoArgsConstructor
@@ -12,4 +13,6 @@ import javax.validation.constraints.NotBlank;
 public class UpdateBookRequest {
     @NotBlank
     private String title;
+    @NotNull
+    private Long version;
 }
