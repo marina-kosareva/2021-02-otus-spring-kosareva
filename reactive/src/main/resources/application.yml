@@ -1,0 +1,9 @@
+spring:
+  data:
+    mongodb:
+      database: reactive
+      port: 27017
+      host: localhost
+mongock:
+  change-logs-scan-package:
+    - ru.otus.reactive.mongock.changelog

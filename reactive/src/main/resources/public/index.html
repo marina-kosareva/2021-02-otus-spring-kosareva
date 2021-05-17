@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css"
+          integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz"
+          crossorigin="anonymous">
+    <title>Books</title>
+    <style type="text/css">
+        .row {
+            margin: 10pt;
+        }
+
+        button {
+            border: 2pt solid olive
+        }
+
+        table {
+            border: none
+        }
+
+        td, th {
+            border-bottom: 2pt solid olive;
+            padding: 5pt
+        }
+    </style>
+    <script src="webjars/jquery/3.3.1/jquery.min.js"></script>
+    <script src="books.js"></script>
+</head>
+<body>
+<div class="row">
+    <label for="addTitle">Title: </label>
+    <input type="text" id="addTitle">
+</div>
+<div class="row">
+    <label for="addGenre">Genre: </label>
+    <input type="text" id="addGenre">
+</div>
+<div class="row">
+    <label for="addAuthor">Author: </label>
+    <input type="text" id="addAuthor">
+</div>
+<div class="row">
+    <button id="btnAddBook" onclick="addBook()"> Add new book</button>
+</div>
+<table id="books">
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>Version</th>
+        <th>Title</th>
+        <th>Genre</th>
+        <th>Author</th>
+        <th></th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+</body>
+</html>
