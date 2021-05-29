@@ -2,6 +2,7 @@ package ru.otus.library.rest;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ru.otus.library.dto.BookDto;
 import ru.otus.library.request.CreateBookRequest;
@@ -39,6 +40,7 @@ public class BookController {
         return bookService.update(id, request.getTitle(), request.getVersion());
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/book/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteById(@PathVariable("id") String id) {
