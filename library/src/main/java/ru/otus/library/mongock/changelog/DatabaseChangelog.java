@@ -3,13 +3,13 @@ package ru.otus.library.mongock.changelog;
 import com.github.cloudyrock.mongock.ChangeLog;
 import com.github.cloudyrock.mongock.ChangeSet;
 import com.mongodb.client.MongoDatabase;
-import ru.otus.library.model.Author;
-import ru.otus.library.model.Book;
-import ru.otus.library.model.Comment;
-import ru.otus.library.model.Genre;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import ru.otus.library.model.*;
 import ru.otus.library.repository.AuthorRepository;
 import ru.otus.library.repository.BookRepository;
 import ru.otus.library.repository.GenreRepository;
+import ru.otus.library.repository.UserRepository;
+import ru.otus.library.model.Roles;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -52,6 +52,20 @@ public class DatabaseChangelog {
         genreRepository.save(genre("Romantic fiction"));
         genreRepository.save(genre("Science fiction"));
         genreRepository.save(genre("Biography"));
+    }
+
+    @ChangeSet(order = "004", id = "insertUsers", author = "kosmar")
+    public void insertUsers(UserRepository repository, PasswordEncoder passwordEncoder) {
+        repository.save(LibraryUser.builder()
+                .name("admin")
+                .password(passwordEncoder.encode("admin"))
+                .roles(Set.of(Roles.ROLE_USER, Roles.ROLE_ADMIN))
+                .build());
+        repository.save(LibraryUser.builder()
+                .name("user")
+                .password(passwordEncoder.encode("user"))
+                .roles(Set.of(Roles.ROLE_USER))
+                .build());
     }
 
     private Genre genre(String title) {

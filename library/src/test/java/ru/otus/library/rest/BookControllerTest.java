@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.otus.library.dto.BookDto;
@@ -19,8 +20,7 @@ import ru.otus.library.service.BookService;
 
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -39,6 +39,7 @@ class BookControllerTest {
     private BookService service;
 
     @Test
+    @WithMockUser
     void getAllBooks() throws Exception {
         when(service.getAll()).thenReturn(asList(BookDto.builder()
                         .id("book1Id")
@@ -76,6 +77,7 @@ class BookControllerTest {
     }
 
     @Test
+    @WithMockUser
     void getById() throws Exception {
         when(service.getBookDtoById("book3Id")).thenReturn(BookDto.builder()
                 .id("book3Id")
@@ -98,6 +100,7 @@ class BookControllerTest {
     }
 
     @Test
+    @WithMockUser
     void save() throws Exception {
         when(service.create("title", "genre1Id", "author2Id"))
                 .thenReturn(BookDto.builder()
@@ -125,6 +128,7 @@ class BookControllerTest {
     }
 
     @Test
+    @WithMockUser
     void update() throws Exception {
         when(service.update("book3Id", "titleNEW", 0L))
                 .thenReturn(BookDto.builder()
@@ -151,6 +155,7 @@ class BookControllerTest {
     }
 
     @Test
+    @WithMockUser
     void update_unknownId() throws Exception {
         when(service.update("unknownBookId", "titleNEW", 1L))
                 .thenThrow(new BookRepositoryException("message"));
@@ -163,6 +168,15 @@ class BookControllerTest {
     }
 
     @Test
+    void deleteById_redirectionToLogin() throws Exception {
+        mvc.perform(delete("/book/book3Id"))
+                .andExpect(status().is3xxRedirection());
+
+        verifyNoInteractions(service);
+    }
+
+    @Test
+    @WithMockUser
     void deleteById() throws Exception {
         mvc.perform(delete("/book/book3Id"))
                 .andExpect(status().isNoContent());
