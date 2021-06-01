@@ -40,7 +40,6 @@ public class BookController {
         return bookService.update(id, request.getTitle(), request.getVersion());
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/book/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteById(@PathVariable("id") String id) {

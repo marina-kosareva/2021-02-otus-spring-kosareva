@@ -177,16 +177,7 @@ class BookControllerTest {
 
     @Test
     @WithMockUser
-    void deleteById_forbidden() throws Exception {
-        mvc.perform(delete("/book/book3Id"))
-                .andExpect(status().isForbidden());
-
-        verifyNoInteractions(service);
-    }
-
-    @Test
-    @WithMockUser(roles = {"ADMIN"})
-    void deleteById_allowed() throws Exception {
+    void deleteById() throws Exception {
         mvc.perform(delete("/book/book3Id"))
                 .andExpect(status().isNoContent());
 
