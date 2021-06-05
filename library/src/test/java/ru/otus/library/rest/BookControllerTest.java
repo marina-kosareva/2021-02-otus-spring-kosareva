@@ -168,14 +168,6 @@ class BookControllerTest {
     }
 
     @Test
-    void deleteById_redirectionToLogin() throws Exception {
-        mvc.perform(delete("/book/book3Id"))
-                .andExpect(status().is3xxRedirection());
-
-        verifyNoInteractions(service);
-    }
-
-    @Test
     @WithMockUser
     void deleteById() throws Exception {
         mvc.perform(delete("/book/book3Id"))
