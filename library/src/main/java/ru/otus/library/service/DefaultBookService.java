@@ -2,6 +2,7 @@ package ru.otus.library.service;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.library.dto.BookDto;
@@ -57,6 +58,7 @@ public class DefaultBookService implements BookService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteById(String id) {
         repository.deleteById(id);
     }

@@ -59,12 +59,12 @@ public class DatabaseChangelog {
         repository.save(LibraryUser.builder()
                 .name("admin")
                 .password(passwordEncoder.encode("admin"))
-                .roles(Set.of(Roles.ROLE_USER, Roles.ROLE_ADMIN))
+                .roles(Set.of(Roles.USER, Roles.ADMIN))
                 .build());
         repository.save(LibraryUser.builder()
                 .name("user")
                 .password(passwordEncoder.encode("user"))
-                .roles(Set.of(Roles.ROLE_USER))
+                .roles(Set.of(Roles.USER))
                 .build());
     }
 
