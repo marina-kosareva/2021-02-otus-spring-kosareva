@@ -58,7 +58,7 @@ public class DefaultBookService implements BookService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteById(String id) {
         repository.deleteById(id);
     }
