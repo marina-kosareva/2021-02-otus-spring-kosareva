@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  shell:
+    interactive:
+      enabled: false
+  flyway:
+    enabled: true
+    locations: classpath:db/schema, classpath:db/test_data
+  jpa:
+    hibernate:
+      ddl-auto: validate
+      use-new-id-generator-mappings: true
+    show-sql: true
+  data:
+    mongodb:
+      port: 0
+  batch:
+    job:
+      enabled: false
