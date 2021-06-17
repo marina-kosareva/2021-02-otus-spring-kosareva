@@ -14,5 +14,6 @@
         <module>books</module>
         <module>library</module>
         <module>reactive</module>
+        <module>batch</module>
     </modules>
 </project>
