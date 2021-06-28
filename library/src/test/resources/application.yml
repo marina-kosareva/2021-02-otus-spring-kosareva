@@ -6,3 +6,12 @@ mongock:
   runner-type: "InitializingBean"
   change-logs-scan-package:
     - ru.otus.library.mongock.test.changelog
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+  endpoint:
+    health:
+      show-details: always

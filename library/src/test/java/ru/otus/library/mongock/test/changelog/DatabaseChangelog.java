@@ -3,13 +3,13 @@ package ru.otus.library.mongock.test.changelog;
 import com.github.cloudyrock.mongock.ChangeLog;
 import com.github.cloudyrock.mongock.ChangeSet;
 import com.mongodb.client.MongoDatabase;
-import ru.otus.library.model.Author;
-import ru.otus.library.model.Book;
-import ru.otus.library.model.Comment;
-import ru.otus.library.model.Genre;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import ru.otus.library.model.*;
 import ru.otus.library.repository.AuthorRepository;
 import ru.otus.library.repository.BookRepository;
 import ru.otus.library.repository.GenreRepository;
+import ru.otus.library.repository.UserRepository;
 
 import java.util.Set;
 
@@ -65,5 +65,21 @@ public class DatabaseChangelog {
                 .title("book3")
                 .build();
         bookRepository.saveAll(asList(book1, book2, book3));
+    }
+
+    @ChangeSet(order = "003", id = "insertUsers", author = "kosmar")
+    public void insertUsers(UserRepository repository) {
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(16);
+        repository.save(LibraryUser.builder()
+                .id("60da1f1f20d2d654330f3d8a")
+                .name("admin")
+                .password(passwordEncoder.encode("admin"))
+                .roles(Set.of(Roles.USER, Roles.ADMIN))
+                .build());
+        repository.save(LibraryUser.builder()
+                .name("user")
+                .password(passwordEncoder.encode("user"))
+                .roles(Set.of(Roles.USER))
+                .build());
     }
 }
