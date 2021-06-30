@@ -9,7 +9,6 @@ import ru.otus.library.repository.AuthorRepository;
 import ru.otus.library.repository.BookRepository;
 import ru.otus.library.repository.GenreRepository;
 import ru.otus.library.repository.UserRepository;
-import ru.otus.library.model.Roles;
 
 import java.util.HashSet;
 import java.util.Set;
