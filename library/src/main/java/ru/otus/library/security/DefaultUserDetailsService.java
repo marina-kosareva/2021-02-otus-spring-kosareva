@@ -28,7 +28,7 @@ public class DefaultUserDetailsService implements UserDetailsService {
 
     private User getUser(LibraryUser libraryUser) {
         List<SimpleGrantedAuthority> authorities = libraryUser.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.name()))
+                .map(role -> new SimpleGrantedAuthority("ROLE_"+ role.name()))
                 .collect(Collectors.toList());
         return new User(libraryUser.getName(), libraryUser.getPassword(), authorities);
     }
