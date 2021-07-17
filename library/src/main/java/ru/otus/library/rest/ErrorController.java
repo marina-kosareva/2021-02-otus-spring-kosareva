@@ -1,5 +1,6 @@
 package ru.otus.library.rest;
 
+import com.netflix.hystrix.exception.HystrixRuntimeException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -41,6 +42,11 @@ public class ErrorController {
     @ExceptionHandler(OptimisticLockingFailureException.class)
     public ResponseEntity<String> handleOptimisticLockingException(OptimisticLockingFailureException ex) {
         return errorResponse("Data out of sync: ", ex);
+    }
+
+    @ExceptionHandler(HystrixRuntimeException.class)
+    public ResponseEntity<String> handleHystrixRuntimeException(HystrixRuntimeException ex) {
+        return errorResponse("Please, try again. Error type: " + ex.getFailureType()+ " . ", ex);
     }
 
     private ResponseEntity<String> errorResponse(String message, Throwable ex) {
